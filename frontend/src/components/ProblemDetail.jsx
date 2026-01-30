@@ -20,7 +20,7 @@ const ProblemDetail = ({ problem, onBack }) => {
     const tabs = ['Overview', 'Deployment', 'Events', 'Logs', 'Troubleshooting'];
 
     return (
-        <div className={`h-full flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300 ${currentTheme.text}`}>
+        <div className="h-full flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300 text-text-main">
             {/* Header Section */}
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-start">
@@ -32,26 +32,26 @@ const ProblemDetail = ({ problem, onBack }) => {
                             <span className="flex items-center gap-1 text-red-500 font-semibold bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
                                 <AlertOctagon size={12} /> Active
                             </span>
-                            <span className={`font-mono ${currentTheme.muted}`}>P-2601869</span>
-                            <span className={`px-1.5 py-0.5 rounded border border-border-muted bg-white/5 text-xs ${currentTheme.muted}`}>Custom</span>
-                            <span className={currentTheme.muted}>Started at {problem?.started || 'Jan 15, 2026, 9:32 PM'} for {problem?.duration || '2 w 1 d'}</span>
+                            <span className="font-mono text-text-muted">P-2601869</span>
+                            <span className="px-1.5 py-0.5 rounded border border-border-muted bg-white/5 text-xs text-text-muted">Custom</span>
+                            <span className="text-text-muted">Started at {problem?.started || 'Jan 15, 2026, 9:32 PM'} for {problem?.duration || '2 w 1 d'}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <button className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded bg-white/5 hover:bg-white/10 border ${currentTheme.border} transition-colors`}>
-                            <Sparkles size={14} className="text-violet-400" />
+                        <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded bg-white/5 hover:bg-white/10 border border-border-muted transition-colors">
+                            <Sparkles size={14} className="text-blue-400" />
                             Explain problem
                         </button>
                         <div className="relative flex items-center">
-                            <button className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-l bg-card-bg hover:bg-white/5 border ${currentTheme.border} transition-colors`}>
+                            <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-l bg-card-bg hover:bg-white/5 border border-border-muted transition-colors">
                                 Send
                             </button>
-                            <button className={`px-2 py-1.5 text-sm font-medium rounded-r bg-card-bg hover:bg-white/5 border-t border-r border-b ${currentTheme.border} border-l-0 transition-colors`}>
+                            <button className="px-2 py-1.5 text-sm font-medium rounded-r bg-card-bg hover:bg-white/5 border-t border-r border-b border-border-muted border-l-0 transition-colors">
                                 <ChevronDownIcon />
                             </button>
                         </div>
-                        <button onClick={onBack} className={`p-2 rounded hover:bg-white/10 transition-colors ${currentTheme.muted} hover:text-white`}>
+                        <button onClick={onBack} className="p-2 rounded hover:bg-white/10 transition-colors text-text-muted hover:text-white">
                             <X size={20} />
                         </button>
                     </div>
@@ -60,7 +60,7 @@ const ProblemDetail = ({ problem, onBack }) => {
                 {/* Context Cards Row */}
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
                     {['Affected frontends', 'Affected services', 'Affected infrastructure', 'Affected synthetic', 'Potentially affected', 'Events'].map((label, idx) => (
-                        <div key={idx} className={`p-3 rounded-lg bg-card-bg border ${currentTheme.border} flex flex-col justify-between h-20`}>
+                        <div key={idx} className="p-3 rounded-lg bg-card-bg border border-border-muted flex flex-col justify-between h-20">
                             <span className="text-xs text-text-muted font-medium truncate">{label}</span>
                             <div className="flex justify-between items-end">
                                 <span className="text-lg font-bold text-white">{idx === 5 ? '10' : '-'}</span>
@@ -91,7 +91,7 @@ const ProblemDetail = ({ problem, onBack }) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
 
                 {/* Left Column: Impact */}
-                <div className={`p-4 rounded-lg bg-card-bg border ${currentTheme.border} flex flex-col`}>
+                <div className="p-4 rounded-lg bg-card-bg border border-border-muted flex flex-col">
                     <div className="flex items-center gap-2 mb-4 text-white font-semibold">
                         <Monitor size={16} />
                         Impact
@@ -104,7 +104,7 @@ const ProblemDetail = ({ problem, onBack }) => {
                         ))}
                     </div>
 
-                    <div className={`flex-1 rounded border ${currentTheme.border} bg-app-bg/50 p-2 overflow-y-auto`}>
+                    <div className="flex-1 rounded border border-border-muted bg-app-bg/50 p-2 overflow-y-auto">
                         <div className="p-2 space-y-2">
                             <div className="flex items-center justify-between p-2 hover:bg-white/5 rounded group cursor-pointer">
                                 <div className="flex items-center gap-3">
@@ -134,7 +134,7 @@ const ProblemDetail = ({ problem, onBack }) => {
                 <div className="flex flex-col gap-4 h-full">
 
                     {/* Root Cause Card */}
-                    <div className={`p-4 rounded-lg bg-card-bg border ${currentTheme.border} h-1/2 flex flex-col`}>
+                    <div className="p-4 rounded-lg bg-card-bg border border-border-muted h-1/2 flex flex-col">
                         <div className="flex items-center gap-2 mb-4 text-white font-semibold">
                             <Monitor size={16} /> {/* Generic icon, effectively "Root cause" */}
                             Root cause
@@ -156,10 +156,10 @@ const ProblemDetail = ({ problem, onBack }) => {
                     </div>
 
                     {/* Visual Resolution Path (Blast Radius) */}
-                    <div className={`p-4 rounded-lg bg-card-bg border ${currentTheme.border} h-1/2 flex flex-col relative overflow-hidden group`}>
+                    <div className="p-4 rounded-lg bg-card-bg border border-border-muted h-1/2 flex flex-col relative overflow-hidden group">
                         <div className="flex items-center justify-between mb-4 z-10">
                             <div className="flex items-center gap-2 text-white font-semibold">
-                                <Layers size={16} className="text-violet-400" />
+                                <Layers size={16} className="text-blue-400" />
                                 Visual resolution path
                             </div>
                             <MoreVertical size={16} className="text-text-muted cursor-pointer" />

@@ -82,16 +82,16 @@ const Dashboard = () => {
                         <div
                             key={service.name}
                             className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-300 ${isDisasterMode && service.id === 'payment'
-                                    ? 'bg-red-500/10 border-red-500/30'
-                                    : 'bg-slate-900/50 border-slate-700/50 hover:bg-slate-800'
+                                ? 'bg-red-500/10 border-red-500/30'
+                                : 'bg-slate-900/50 border-slate-700/50 hover:bg-slate-800'
                                 }`}
                         >
                             <div className="flex items-center gap-3">
                                 <div className="relative">
                                     <div
                                         className={`w-3 h-3 rounded-full ${isDisasterMode && service.id === 'payment'
-                                                ? 'bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]'
-                                                : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+                                            ? 'bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]'
+                                            : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
                                             }`}
                                     />
                                     {isDisasterMode && service.id === 'payment' && (
@@ -105,8 +105,8 @@ const Dashboard = () => {
                             </div>
                             <span
                                 className={`text-xs px-2 py-1 rounded-full border ${isDisasterMode && service.id === 'payment'
-                                        ? 'bg-red-500/20 text-red-300 border-red-500/20'
-                                        : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                    ? 'bg-red-500/20 text-red-300 border-red-500/20'
+                                    : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                     }`}
                             >
                                 {isDisasterMode && service.id === 'payment' ? 'Error' : 'Operational'}
@@ -117,9 +117,7 @@ const Dashboard = () => {
                     <div className="mt-8 pt-4 border-t border-slate-700/50">
                         {!isDisasterMode ? (
                             <button
-                                onClick={handleDeploy}
-                                disabled={activeDeploy}
-                                className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white rounded-lg font-semibold shadow-lg shadow-violet-500/25 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold shadow-sm transition-colors duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {activeDeploy ? (
                                     <>
@@ -138,7 +136,7 @@ const Dashboard = () => {
                         ) : (
                             <button
                                 onClick={handleRollback}
-                                className="w-full py-3 px-4 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg font-semibold shadow-lg transition-all duration-300 border border-slate-600 hover:border-slate-500 flex items-center justify-center gap-2"
+                                className="w-full py-3 px-4 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg font-semibold shadow-sm transition-colors duration-200 border border-slate-600 hover:border-slate-500 flex items-center justify-center gap-2"
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -160,8 +158,8 @@ const Dashboard = () => {
                         >
                             <defs>
                                 <linearGradient id="colorUsage" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor={isDisasterMode ? "#ef4444" : "#8b5cf6"} stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor={isDisasterMode ? "#ef4444" : "#8b5cf6"} stopOpacity={0} />
+                                    <stop offset="5%" stopColor={isDisasterMode ? "#ef4444" : "#3b82f6"} stopOpacity={0.8} />
+                                    <stop offset="95%" stopColor={isDisasterMode ? "#ef4444" : "#3b82f6"} stopOpacity={0} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
@@ -192,7 +190,7 @@ const Dashboard = () => {
                             <Area
                                 type="monotone"
                                 dataKey="usage"
-                                stroke={isDisasterMode ? "#ef4444" : "#8b5cf6"}
+                                stroke={isDisasterMode ? "#ef4444" : "#3b82f6"}
                                 strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorUsage)"

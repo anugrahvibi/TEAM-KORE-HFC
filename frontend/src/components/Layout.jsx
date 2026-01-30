@@ -86,10 +86,10 @@ const Layout = ({ children, activeTab, onTabChange, user, onLogout }) => {
                 </div>
             </main>
 
-            {/* Background decoration */}
+            {/* Subtle Background Glows (Neutral/Blue) */}
             <div className="fixed inset-0 pointer-events-none z-[-1]">
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-fuchsia-600/10 rounded-full blur-3xl" />
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl" />
             </div>
         </div>
     );
