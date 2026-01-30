@@ -4,9 +4,13 @@ import { toast } from 'sonner';
 import Card from './Card';
 
 const Dashboard = () => {
-    const [isDisasterMode, setIsDisasterMode] = useState(false);
-    const [cpuData, setCpuData] = useState([]);
-    const [activeDeploy, setActiveDeploy] = useState(false);
+    // Initial zero data for animation
+    const generateZeroData = () => {
+        return Array.from({ length: 20 }, (_, i) => ({
+            time: `${10 + Math.floor(i / 4)}:${(i % 4) * 15}`.replace(/:0$/, ':00'),
+            usage: 0,
+        }));
+    };
 
     // Initial normal data
     const generateNormalData = () => {
@@ -26,12 +30,20 @@ const Dashboard = () => {
         return data;
     };
 
+    const [isDisasterMode, setIsDisasterMode] = useState(false);
+    const [cpuData, setCpuData] = useState(generateZeroData());
+    const [activeDeploy, setActiveDeploy] = useState(false);
+
     useEffect(() => {
-        if (isDisasterMode) {
-            setCpuData(generateDisasterData());
-        } else {
-            setCpuData(generateNormalData());
-        }
+        // Delay to allow 'zero' state to render, then animate vertically to real values
+        const timer = setTimeout(() => {
+            if (isDisasterMode) {
+                setCpuData(generateDisasterData());
+            } else {
+                setCpuData(generateNormalData());
+            }
+        }, 500); // Increased to 500ms to ensure wipe doesn't happen, only interpolation
+        return () => clearTimeout(timer);
     }, [isDisasterMode]);
 
     const services = [
@@ -117,6 +129,8 @@ const Dashboard = () => {
                     <div className="mt-8 pt-4 border-t border-slate-700/50">
                         {!isDisasterMode ? (
                             <button
+                                onClick={handleDeploy}
+                                disabled={activeDeploy}
                                 className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold shadow-sm transition-colors duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {activeDeploy ? (
@@ -194,7 +208,6 @@ const Dashboard = () => {
                                 strokeWidth={3}
                                 fillOpacity={1}
                                 fill="url(#colorUsage)"
-                                animationDuration={1500}
                             />
                         </AreaChart>
                     </ResponsiveContainer>
