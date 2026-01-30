@@ -87,7 +87,7 @@ const Problems = () => {
                 <div>
                     {/* Default Filter Button */}
                     <div className="mb-6">
-                        <button className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-card-bg border border-border-muted text-sm font-medium hover:border-text-muted transition-colors">
+                        <button className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-card-bg border border-border-muted shadow-sm text-sm font-medium hover:border-text-muted transition-colors">
                             <span className="flex items-center gap-2 text-blue-400">
                                 Default filter
                             </span>
@@ -140,7 +140,7 @@ const Problems = () => {
             {/* Main Content */}
             <div className="flex-1 min-w-0 space-y-4">
                 {/* Top Header Panel */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-card-bg border border-border-muted">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-card-bg border border-border-muted shadow-sm">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-white/5 rounded-md text-text-muted">
                             <LayoutGrid size={20} />
@@ -168,7 +168,7 @@ const Problems = () => {
                 </div>
 
                 {/* Chart Section */}
-                <div className="p-4 rounded-lg bg-card-bg border border-border-muted">
+                <div className="p-4 rounded-lg bg-card-bg border border-border-muted shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2 relative w-full max-w-md">
                             <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
@@ -221,7 +221,7 @@ const Problems = () => {
                                     content={({ active, payload, label }) => {
                                         if (active && payload && payload.length) {
                                             return (
-                                                <div className="bg-[#1e293b] border border-[#2d2d3b] rounded-md p-3 min-w-[200px] z-50">
+                                                <div className="bg-[#1e293b] border border-[#2d2d3b] rounded-md shadow-xl p-3 min-w-[200px] z-50">
                                                     <div className="text-xs text-gray-400 mb-2 font-medium">
                                                         <span className="bg-gray-700 text-gray-300 px-1 rounded mr-2">5min</span>
                                                         Today, {label} to {payload[0].payload.endTime}
@@ -252,7 +252,7 @@ const Problems = () => {
                 </div>
 
                 {/* Table Section */}
-                <div className="overflow-hidden rounded-lg bg-card-bg border border-border-muted">
+                <div className="overflow-hidden rounded-lg bg-card-bg border border-border-muted shadow-sm">
                     <div className="flex justify-end p-2 border-b border-border-muted">
                         <button className="flex items-center gap-1 text-xs font-medium text-text-muted hover:text-text-main">
                             <List size={12} /> 5 columns hidden

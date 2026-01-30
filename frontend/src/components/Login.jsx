@@ -21,7 +21,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl mix-blend-screen pointer-events-none animate-pulse" />
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-sky-600/10 rounded-full blur-3xl mix-blend-screen pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
 
-            <div className="max-w-md w-full bg-slate-800/80 backdrop-blur-xl border border-slate-700 rounded-xl p-8 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-500">
+            <div className="max-w-md w-full bg-slate-800/80 backdrop-blur-xl border border-slate-700 rounded-xl p-8 shadow-2xl relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-500">
                 <div className="text-center mb-8">
                     <div className="inline-flex h-12 w-12 bg-blue-600 rounded-lg items-center justify-center mb-4">
                         <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,7 +60,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg transition-colors duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+                        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg shadow-sm transition-colors duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
                     >
                         {isLoading ? (
                             <>

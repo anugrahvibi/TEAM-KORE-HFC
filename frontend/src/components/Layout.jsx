@@ -12,12 +12,12 @@ const Layout = ({ children, activeTab, onTabChange, user, onLogout }) => {
                     <div className="flex h-16 items-center justify-between">
                         {/* Title */}
                         <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 bg-blue-600 rounded-md flex items-center justify-center">
+                            <div className="h-8 w-8 bg-gradient-to-br from-primary to-secondary rounded-md flex items-center justify-center shadow-lg shadow-primary/20">
                                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                             </div>
-                            <h1 className="text-xl font-bold text-white tracking-tight">
+                            <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary tracking-tight">
                                 DevInsight
                             </h1>
                         </div>
@@ -35,7 +35,7 @@ const Layout = ({ children, activeTab, onTabChange, user, onLogout }) => {
                                             } `}
                                     >
                                         {activeTab === tab && (
-                                            <span className="absolute inset-0 bg-primary/10 rounded-md ring-1 ring-primary/40 shadow-[0_0_15px_rgba(0,161,255,0.15)] pointer-events-none" />
+                                            <span className="absolute inset-0 bg-primary/10 rounded-md ring-1 ring-primary/50 shadow-[0_0_15px_rgba(var(--color-primary),0.3)] pointer-events-none" />
                                         )}
                                         <span className="relative z-10">{tab}</span>
                                         {/* Hover glow effect for non-active tabs */}

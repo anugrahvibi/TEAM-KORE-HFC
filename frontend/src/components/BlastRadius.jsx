@@ -116,7 +116,7 @@ const BlastRadius = () => {
                             </div>
 
                             <div className="flex-shrink-0">
-                                <button className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors">
+                                <button className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold shadow-sm hover:bg-red-500 transition-colors">
                                     View Blocking Issues
                                 </button>
                             </div>
@@ -165,18 +165,18 @@ const BlastRadius = () => {
 
                                 {/* Nodes */}
                                 <div className="absolute left-10 md:left-20 flex flex-col items-center z-10">
-                                    <div className="w-16 h-16 rounded-xl bg-blue-600 shadow-[0_0_20px_rgba(0,161,255,0.3)] border-2 border-white/20 flex items-center justify-center mb-2">
+                                    <div className="w-16 h-16 rounded-xl bg-blue-600 shadow-[0_0_20px_rgb(37,99,235,0.5)] border-2 border-white/20 flex items-center justify-center mb-2">
                                         <span className="font-bold text-white text-xs">Payment</span>
                                     </div>
                                 </div>
 
                                 <div className="absolute right-10 md:right-20 flex flex-col gap-12 z-10">
-                                    <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-600">
+                                    <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-600 shadow-xl">
                                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                                         <div className="text-sm font-medium text-slate-200">Checkout Service</div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-600">
+                                    <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-600 shadow-xl">
                                         <div className="w-3 h-3 rounded-full bg-orange-500"></div>
                                         <div className="text-sm font-medium text-slate-200">API Gateway</div>
                                     </div>

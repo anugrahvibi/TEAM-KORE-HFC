@@ -145,7 +145,7 @@ const ProblemDetail = ({ problem, onBack }) => {
                             <div className="relative w-16 h-16 mb-3 flex items-center justify-center">
                                 <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-pulse"></div>
                                 <div className="absolute inset-2 bg-blue-500/10 rounded-full border border-blue-400/30"></div>
-                                <Sparkles size={24} className="text-blue-400 relative z-10 drop-shadow-[0_0_8px_rgba(0,161,255,0.6)]" />
+                                <Sparkles size={24} className="text-blue-400 relative z-10" />
                             </div>
 
                             <div className="text-center space-y-1">
@@ -171,7 +171,7 @@ const ProblemDetail = ({ problem, onBack }) => {
 
                                 {/* Tier 1: Application */}
                                 <div className="flex flex-col items-center relative z-10">
-                                    <div className="w-10 h-10 rounded border border-white/20 bg-[#1A1A24] flex items-center justify-center">
+                                    <div className="w-10 h-10 rounded border border-white/20 bg-[#1A1A24] flex items-center justify-center shadow-lg">
                                         <Globe size={18} className="text-green-500" />
                                     </div>
                                     <span className="text-[9px] mt-1 text-text-muted uppercase tracking-widest">Application</span>
@@ -182,7 +182,7 @@ const ProblemDetail = ({ problem, onBack }) => {
                                 {/* Tier 2: Services (The Problem Area) */}
                                 <div className="flex items-center gap-8 relative z-10">
                                     <div className="flex flex-col items-center">
-                                        <div className="w-12 h-12 rounded border-2 border-red-500 bg-[#321818] flex items-center justify-center animate-pulse">
+                                        <div className="w-12 h-12 rounded border-2 border-red-500 bg-[#321818] flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-pulse">
                                             <Server size={20} className="text-white" />
                                         </div>
                                         <div className="mt-1 flex flex-col items-center">
