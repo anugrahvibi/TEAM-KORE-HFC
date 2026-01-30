@@ -1,0 +1,54 @@
+{
+  "predictions": [
+    {
+      "anomaly_score": 0.15,
+      "is_anomaly": false,
+      "confidence": 0.92,
+      "features": {
+        "mean_cpu": 52.0,
+        "std_cpu": 4.0,
+        "min_cpu": 45.0,
+        "max_cpu": 60.0,
+        "delta_cpu": 3.0,
+        "cpu_trend": 0.2,
+        "cpu_volatility": 0.15,
+        "mean_memory": 48.0,
+        "std_memory": 3.0,
+        "memory_trend": 0.1,
+        "mean_requests": 1200.0,
+        "request_spike_count": 0,
+        "throughput_delta": 50.0,
+        "cost_delta": 5.0,
+        "unit_economics_ratio": 1.4
+      }
+    },
+    {
+      "anomaly_score": 0.82,
+      "is_anomaly": true,
+      "confidence": 0.95,
+      "features": {
+        "mean_cpu": 90.0,
+        "std_cpu": 15.0,
+        "min_cpu": 55.0,
+        "max_cpu": 99.0,
+        "delta_cpu": 35.0,
+        "cpu_trend": 2.5,
+        "cpu_volatility": 1.8,
+        "mean_memory": 60.0,
+        "std_memory": 5.0,
+        "memory_trend": 0.3,
+        "mean_requests": 1600.0,
+        "request_spike_count": 3,
+        "throughput_delta": 120.0,
+        "cost_delta": 35.0,
+        "unit_economics_ratio": 0.5
+      }
+    }
+  ],
+  "metadata": {
+    "model_version": "1.0.0",
+    "prediction_timestamp": "2026-01-30T17:42:35+05:30",
+    "input_rows": 2,
+    "anomalies_detected": 1
+  }
+}
