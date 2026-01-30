@@ -18,12 +18,12 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
     return (
         <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
             {/* Background decoration */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl mix-blend-screen pointer-events-none animate-pulse" />
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-fuchsia-600/20 rounded-full blur-3xl mix-blend-screen pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl mix-blend-screen pointer-events-none animate-pulse" />
+            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-sky-600/10 rounded-full blur-3xl mix-blend-screen pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
 
-            <div className="max-w-md w-full bg-slate-800/80 backdrop-blur-xl border border-slate-700 rounded-xl p-8 shadow-2xl relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-500">
+            <div className="max-w-md w-full bg-slate-800/80 backdrop-blur-xl border border-slate-700 rounded-xl p-8 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-500">
                 <div className="text-center mb-8">
-                    <div className="inline-flex h-12 w-12 bg-gradient-to-br from-violet-500 to-fuchsia-600 rounded-lg items-center justify-center shadow-lg shadow-violet-500/20 mb-4">
+                    <div className="inline-flex h-12 w-12 bg-blue-600 rounded-lg items-center justify-center mb-4">
                         <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
@@ -40,7 +40,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
+                            className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
                             placeholder="admin@devinsight.io"
                         />
                     </div>
@@ -52,7 +52,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
+                            className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
                             placeholder="••••••••"
                         />
                     </div>
@@ -60,7 +60,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold py-3.5 rounded-lg shadow-lg shadow-violet-500/25 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+                        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg transition-colors duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
                     >
                         {isLoading ? (
                             <>
@@ -111,7 +111,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
                         Don't have an account?{' '}
                         <button
                             onClick={onSwitchToRegister}
-                            className="text-violet-400 hover:text-violet-300 font-semibold transition-colors"
+                            className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
                         >
                             Create Account
                         </button>

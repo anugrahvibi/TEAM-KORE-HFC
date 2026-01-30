@@ -18,33 +18,24 @@ const BlastRadius = () => {
     return (
         <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
 
-            {/* Input Section - Always visible or conditional? 
-          User said "Input Section... Loading State... Results Section".
-          Usually in these dashboards the input stays or transforms. 
-          I'll keep the input visible but disabled during analysis, 
-          and maybe collapsed or just part of the header in results view.
-          For simplicity and focus, I'll switch views or just append results.
-          Let's go with a focused "Action -> Result" flow.
-      */}
-
             {status === 'idle' && (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-8">
                     <div className="text-center space-y-2">
-                        <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-fuchsia-400">
+                        <h2 className="text-3xl font-bold text-white">
                             Pre-Deployment Risk Analyzer
                         </h2>
                         <p className="text-slate-400">Simulate deployment impacts before merging to production.</p>
                     </div>
 
-                    <Card className="w-full max-w-lg border-t-4 border-t-violet-500">
+                    <Card className="w-full max-w-lg border-t-4 border-t-blue-500">
                         <div className="space-y-6">
                             <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700/50 flex items-center justify-between">
                                 <div>
                                     <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Target Service</div>
                                     <div className="text-lg font-mono text-slate-200 mt-1">payment-service</div>
                                 </div>
-                                <div className="h-10 w-10 rounded-full bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
-                                    <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                                    <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                     </svg>
                                 </div>
@@ -65,7 +56,7 @@ const BlastRadius = () => {
 
                             <button
                                 onClick={handleAnalyze}
-                                className="w-full py-4 bg-white text-slate-900 hover:bg-slate-200 rounded-lg font-bold text-lg shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-all duration-300 transform hover:scale-[1.01] active:scale-[0.99]"
+                                className="w-full py-4 bg-white text-slate-900 hover:bg-slate-200 rounded-lg font-bold text-lg shadow-sm transition-all duration-200"
                             >
                                 Analyze Impact
                             </button>
@@ -78,9 +69,9 @@ const BlastRadius = () => {
                 <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-6">
                     <div className="relative">
                         <div className="w-24 h-24 border-4 border-slate-800 rounded-full"></div>
-                        <div className="absolute top-0 left-0 w-24 h-24 border-4 border-t-violet-500 border-r-fuchsia-500 border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+                        <div className="absolute top-0 left-0 w-24 h-24 border-4 border-t-blue-500 border-r-sky-500 border-b-transparent border-l-transparent rounded-full animate-spin"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-16 h-16 bg-violet-500/10 rounded-full animate-pulse"></div>
+                            <div className="w-16 h-16 bg-blue-500/10 rounded-full animate-pulse"></div>
                         </div>
                     </div>
                     <div className="text-center space-y-2">
@@ -91,9 +82,9 @@ const BlastRadius = () => {
                     {/* Fake console logs for effect */}
                     <div className="w-full max-w-md bg-slate-950/50 rounded-lg p-4 font-mono text-xs space-y-1 text-slate-500 overflow-hidden border border-slate-800/50">
                         <div className="animate-pulse delay-75">[analyzer] Parsing AST for payment-service...</div>
-                        <div className="animate-pulse delay-150 text-violet-400/80">✔ Found new database migration</div>
+                        <div className="animate-pulse delay-150 text-blue-400/80">✔ Found new database migration</div>
                         <div className="animate-pulse delay-300">⟳ Simulating load on checkout-api</div>
-                        <div className="animate-pulse delay-500 text-fuchsia-400/80">⚠ Detected schema breaking change</div>
+                        <div className="animate-pulse delay-500 text-amber-400/80">⚠ Detected schema breaking change</div>
                     </div>
                 </div>
             )}
@@ -109,11 +100,7 @@ const BlastRadius = () => {
                     </div>
 
                     {/* High Risk Banner */}
-                    <div className="bg-gradient-to-r from-red-950/80 to-red-900/40 border border-red-500/30 rounded-xl p-6 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <svg className="w-48 h-48 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
-                        </div>
-
+                    <div className="bg-red-950/40 border border-red-500/30 rounded-xl p-6 relative overflow-hidden group">
                         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div>
                                 <div className="flex items-center gap-2 text-red-400 font-bold tracking-wider text-sm uppercase mb-2">
@@ -129,7 +116,7 @@ const BlastRadius = () => {
                             </div>
 
                             <div className="flex-shrink-0">
-                                <button className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold shadow-lg shadow-red-900/50 hover:bg-red-500 transition-colors">
+                                <button className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors">
                                     View Blocking Issues
                                 </button>
                             </div>
@@ -178,18 +165,18 @@ const BlastRadius = () => {
 
                                 {/* Nodes */}
                                 <div className="absolute left-10 md:left-20 flex flex-col items-center z-10">
-                                    <div className="w-16 h-16 rounded-xl bg-violet-600 shadow-[0_0_20px_rgba(124,58,237,0.5)] border-2 border-white/20 flex items-center justify-center mb-2">
+                                    <div className="w-16 h-16 rounded-xl bg-blue-600 shadow-[0_0_20px_rgba(0,161,255,0.3)] border-2 border-white/20 flex items-center justify-center mb-2">
                                         <span className="font-bold text-white text-xs">Payment</span>
                                     </div>
                                 </div>
 
                                 <div className="absolute right-10 md:right-20 flex flex-col gap-12 z-10">
-                                    <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-600 shadow-xl">
+                                    <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-600">
                                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                                         <div className="text-sm font-medium text-slate-200">Checkout Service</div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-600 shadow-xl">
+                                    <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-600">
                                         <div className="w-3 h-3 rounded-full bg-orange-500"></div>
                                         <div className="text-sm font-medium text-slate-200">API Gateway</div>
                                     </div>

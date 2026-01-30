@@ -13,24 +13,14 @@ const Prioritization = () => {
         { id: 'S-506', name: 'Server-side request forgery at Proxy...', score: 'Critical 10.0', type: 'Code-level', status: 'Open', muted: 'Not muted', openSince: '2 months ago', date: 'Nov 17, 2025, 11:42 PM' },
     ];
 
-    const currentTheme = {
-        bg: 'bg-app-bg',
-        card: 'bg-card-bg',
-        text: 'text-text-main',
-        muted: 'text-text-muted',
-        border: 'border-border-muted',
-        hover: 'hover:bg-white/5',
-        primary: 'text-primary',
-    };
-
     return (
-        <div className={`h-full ${currentTheme.text} space-y-4`}>
+        <div className="h-full text-text-main space-y-4">
             {/* Header Area */}
             <div className="flex flex-col gap-4">
                 <div className="flex items-start justify-between">
                     <div>
                         <h1 className="text-2xl font-bold mb-1">Prioritization</h1>
-                        <p className={`${currentTheme.muted} text-sm`}>
+                        <p className="text-text-muted text-sm">
                             See which vulnerabilities need immediate action and which have been fixed.
                         </p>
                     </div>
@@ -50,21 +40,21 @@ const Prioritization = () => {
 
                 {/* Filters */}
                 <div className="flex items-center justify-between gap-4 mt-2">
-                    <button className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border ${currentTheme.border} bg-card-bg hover:bg-white/5`}>
+                    <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-border-muted bg-card-bg hover:bg-white/5">
                         Last 30 minutes
                         <ChevronDown size={14} />
                     </button>
                     {/* Search & Refresh */}
                     <div className="flex-1 flex gap-2">
                         <div className="relative flex-1">
-                            <Filter size={16} className={`absolute left-3 top-1/2 -translate-y-1/2 ${currentTheme.muted}`} />
+                            <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                             <input
                                 type="text"
                                 placeholder="Type to filter"
-                                className={`w-full pl-9 pr-4 py-1.5 text-sm rounded-md border ${currentTheme.border} bg-card-bg text-text-main placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-primary`}
+                                className="w-full pl-9 pr-4 py-1.5 text-sm rounded-md border border-border-muted bg-card-bg text-text-main placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
                             />
                         </div>
-                        <button className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md border ${currentTheme.border} bg-card-bg hover:bg-white/5`}>
+                        <button className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-md border border-border-muted bg-card-bg hover:bg-white/5">
                             <RefreshCcw size={14} />
                             Refresh
                         </button>
@@ -82,7 +72,7 @@ const Prioritization = () => {
 
             {/* Security Advisor Button */}
             <div className="flex justify-between items-center">
-                <button className={`px-3 py-1.5 text-xs font-semibold rounded-md bg-[#2e2e3a] text-gray-200 hover:bg-[#3e3e4a]`}>
+                <button className="px-3 py-1.5 text-xs font-semibold rounded-md bg-[#2e2e3a] text-gray-200 hover:bg-[#3e3e4a]">
                     Security Advisor
                 </button>
                 <div className="flex items-center gap-3 text-text-muted">
@@ -96,7 +86,7 @@ const Prioritization = () => {
             </div>
 
             {/* Table */}
-            <div className={`overflow-hidden rounded-lg bg-card-bg border ${currentTheme.border} shadow-sm`}>
+            <div className="overflow-hidden rounded-lg bg-card-bg border border-border-muted shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-white/5 border-b border-border-muted text-xs uppercase text-text-muted font-semibold">
