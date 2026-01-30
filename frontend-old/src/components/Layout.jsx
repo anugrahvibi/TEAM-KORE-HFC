@@ -2,7 +2,7 @@
 import React from 'react';
 
 const Layout = ({ children, activeTab, onTabChange, user, onLogout }) => {
-    const tabs = ['Engineer View', 'Problems', 'Prioritization'];
+    const tabs = ['Engineer View', 'Executive View', 'Blast Radius Predictor'];
 
     return (
         <div className="min-h-screen bg-app-bg text-text-main font-sans selection:bg-primary selection:text-white">

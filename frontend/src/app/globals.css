@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  /* Semantic Theme Colors mapped to CSS Variables */
+  --color-app-bg: var(--color-app-bg);
+  --color-card-bg: var(--color-card-bg);
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-text-main: var(--color-text-main);
+  --color-text-muted: var(--color-text-muted);
+  --color-border-muted: var(--color-border-muted);
+}
+
+:root {
+  /* DARK THEME CONFIGURATION */
+
+  /* Backgrounds */
+  --color-app-bg: #111116;
+  /* Very dark background */
+  --color-card-bg: #181921;
+  /* Slightly lighter for cards/surfaces */
+
+  /* Accents */
+  --color-primary: #f24e1e;
+  /* Red-orange from chart/active state */
+  --color-secondary: #6366f1;
+  /* Indigo for contrast if needed */
+
+  /* Text - Light for dark theme */
+  --color-text-main: #f3f4f6;
+  /* gray-100 */
+  --color-text-muted: #9ca3af;
+  /* gray-400 */
+  --color-border-muted: #2d2d3b;
+  /* subtle dark border */
+
+  /* Base Typography */
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: var(--color-text-main);
+  background-color: var(--color-app-bg);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

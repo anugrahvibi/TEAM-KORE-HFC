@@ -1,0 +1,319 @@
+import React, { useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { Filter, RefreshCcw, Activity, AlertOctagon, Monitor, Clock, ChevronDown, Download, EyeOff, LayoutGrid, List } from 'lucide-react';
+
+import ProblemDetail from './ProblemDetail';
+
+const Problems = () => {
+    const [selectedProblem, setSelectedProblem] = useState(null);
+    const [activeFilter, setActiveFilter] = useState('All');
+    const [selectedCategory, setSelectedCategory] = useState([]);
+
+    // Theme vars... (kept same)
+    const currentTheme = {
+        bg: 'bg-app-bg',
+        card: 'bg-card-bg',
+        text: 'text-text-main',
+        muted: 'text-text-muted',
+        border: 'border-border-muted',
+        hover: 'hover:bg-white/5',
+        primary: 'text-primary',
+        chartFill: '#ef4444',
+    };
+
+    // Mock Data for the Chart - 5 min intervals for 2 hours (24 points)
+    const chartData = Array.from({ length: 24 }, (_, i) => {
+        const hour = Math.floor(i / 12) + 6; // Start at 6 PM
+        const minute = (i % 12) * 5;
+        const nextMinute = minute + 5;
+
+        const formatTime = (h, m) => {
+            const period = h >= 12 ? 'PM' : 'AM';
+            const displayH = h > 12 ? h - 12 : h;
+            return `${displayH}:${m.toString().padStart(2, '0')} ${period}`;
+        };
+
+        // Only show label every 3rd point or specific points to match screenshot "06:45 PM", "07 PM"
+        let label = formatTime(hour + 12, minute); // Using PM
+        if (minute === 0) label = `${hour > 12 ? hour - 12 : hour} PM`; // "07 PM"
+
+        return {
+            time: label,
+            endTime: formatTime(hour + 12, nextMinute),
+            // Randomize slightly for visual interest but keep it close to screenshot's "heavy" load
+            count: 10 + Math.floor(Math.random() * 5),
+        };
+    });
+
+    // Mock Data for the Table
+    const problems = [
+        { id: 'P-2601869', name: 'Cisco Memory Free critical low', status: 'Active', category: 'Custom', affected: '1 service', started: 'Jan 15, 21:32', duration: '2 w 1 d' },
+        { id: 'P-2601844', name: 'Memory saturation', status: 'Active', category: 'Resource contention', affected: '1 host', started: 'Jan 16, 06:15', duration: '2 w 18 h' },
+        { id: 'P-2601843', name: 'Memory saturation', status: 'Active', category: 'Resource contention', affected: '1 host', started: 'Jan 16, 06:14', duration: '2 w 18 h' },
+        { id: 'P-2600212', name: 'User action duration degradation', status: 'Active', category: 'Custom', affected: '1 application', started: 'Jan 14, 02:49', duration: '2 w 3 d' },
+        { id: 'P-2599602', name: 'Failure rate increase', status: 'Active', category: 'Availability', affected: '1 service', started: 'Jan 13, 09:30', duration: '2 w 4 d' },
+        { id: 'P-2599601', name: 'Failure rate increase', status: 'Active', category: 'Availability', affected: '1 service', started: 'Jan 13, 09:30', duration: '2 w 4 d' },
+        { id: 'P-2599600', name: 'Failure rate increase', status: 'Active', category: 'Availability', affected: '1 service', started: 'Jan 13, 09:30', duration: '2 w 4 d' },
+        { id: 'P-2599599', name: 'Failure rate increase', status: 'Active', category: 'Availability', affected: '1 service', started: 'Jan 13, 09:30', duration: '2 w 4 d' },
+        { id: 'P-2599598', name: 'Failure rate increase', status: 'Active', category: 'Availability', affected: '1 service', started: 'Jan 13, 09:30', duration: '2 w 4 d' },
+        { id: 'P-2598379', name: 'Synthetic monitor outage', status: 'Active', category: 'Availability', affected: '1 monitor', started: 'Jan 12, 11:21', duration: '2 w 5 d' },
+        { id: 'P-2593412', name: 'Host or monitoring unavailable', status: 'Active', category: 'Availability', affected: '1 host', started: 'Jan 07, 09:12', duration: '3 w 3 d' },
+        { id: 'P-2586616', name: 'High connectivity failures', status: 'Active', category: 'Custom alert', affected: '1 entity', started: 'Dec 30, 23:25', duration: '4 w 3 d' },
+    ];
+
+    const categories = ['Resource contention', 'Custom', 'Availability', 'Custom alert'];
+
+    const handleCategoryChange = (category) => {
+        if (selectedCategory.includes(category)) {
+            setSelectedCategory(selectedCategory.filter(c => c !== category));
+        } else {
+            setSelectedCategory([...selectedCategory, category]);
+        }
+    };
+
+    // If a problem is selected, render the detail view
+    if (selectedProblem) {
+        return <ProblemDetail problem={selectedProblem} onBack={() => setSelectedProblem(null)} />;
+    }
+
+    return (
+        <div className={`flex flex-col lg:flex-row gap-6 h-full ${currentTheme.text}`}>
+            {/* Sidebar / Filters */}
+            <div className="w-full lg:w-64 flex-shrink-0 space-y-8">
+                {/* Status Filter */}
+                <div>
+                    {/* Default Filter Button */}
+                    <div className="mb-6">
+                        <button className={`w-full flex items-center justify-between px-3 py-2 rounded-md bg-card-bg border ${currentTheme.border} shadow-sm text-sm font-medium hover:border-text-muted transition-colors`}>
+                            <span className="flex items-center gap-2 text-violet-400">
+                                Default filter
+                            </span>
+                            <ChevronDown size={14} className={currentTheme.muted} />
+                        </button>
+                    </div>
+
+                    <h3 className={`text-sm font-semibold mb-3 ${currentTheme.muted}`}>Status</h3>
+                    <div className="space-y-2">
+                        {['All', 'Active', 'Closed'].map((status) => (
+                            <label key={status} className="flex items-center gap-2 cursor-pointer group">
+                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${activeFilter === status ? 'border-primary' : `${currentTheme.border} group-hover:border-primary`}`}>
+                                    {activeFilter === status && <div className="w-2 h-2 rounded-full bg-primary" />}
+                                </div>
+                                <span className={`text-sm ${activeFilter === status ? 'font-medium text-text-main' : currentTheme.muted} group-hover:text-text-main`}>{status}</span>
+                                <input
+                                    type="radio"
+                                    name="status"
+                                    className="hidden"
+                                    checked={activeFilter === status}
+                                    onChange={() => setActiveFilter(status)}
+                                />
+                            </label>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Category Filter */}
+                <div>
+                    <h3 className={`text-sm font-semibold mb-3 ${currentTheme.muted}`}>Category</h3>
+                    <div className="space-y-2">
+                        {categories.map((category) => (
+                            <label key={category} className="flex items-center gap-2 cursor-pointer group">
+                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedCategory.includes(category) ? 'bg-primary border-primary' : `${currentTheme.border} group-hover:border-primary`}`}>
+                                    {selectedCategory.includes(category) && <div className="w-2 h-2 bg-white" />}
+                                </div>
+                                <span className={`text-sm ${selectedCategory.includes(category) ? 'font-medium text-text-main' : currentTheme.muted} group-hover:text-text-main`}>{category}</span>
+                                <input
+                                    type="checkbox"
+                                    className="hidden"
+                                    checked={selectedCategory.includes(category)}
+                                    onChange={() => handleCategoryChange(category)}
+                                />
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 min-w-0 space-y-4">
+                {/* Top Header Panel */}
+                <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-card-bg border ${currentTheme.border} shadow-sm`}>
+                    <div className="flex items-center gap-4">
+                        <div className="p-2 bg-white/5 rounded-md text-text-muted">
+                            <LayoutGrid size={20} />
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <h2 className="text-lg font-bold text-text-main">Problems</h2>
+                            <span className="px-2 py-0.5 text-xs font-semibold bg-red-500/10 text-red-500 rounded-full border border-red-500/20">
+                                <Activity size={10} className="inline mr-1" />
+                                13 active
+                            </span>
+                            <span className={`text-sm ${currentTheme.muted}`}>/ 19</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border ${currentTheme.border} hover:bg-white/5 text-text-muted hover:text-text-main transition-colors`}>
+                            Last 2 hours
+                            <ChevronDown size={14} />
+                        </button>
+                        <div className="flex items-center gap-1 text-xs text-text-muted">
+                            <RefreshCcw size={12} />
+                            <span>refreshed 1 min. ago</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Chart Section */}
+                <div className={`p-4 rounded-lg bg-card-bg border ${currentTheme.border} shadow-sm`}>
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2 relative w-full max-w-md">
+                            <Filter size={16} className={`absolute left-3 top-1/2 -translate-y-1/2 ${currentTheme.muted}`} />
+                            <input
+                                type="text"
+                                placeholder="Type to filter..."
+                                className={`w-full pl-9 pr-4 py-1.5 text-sm rounded-md border ${currentTheme.border} bg-app-bg text-text-main placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-primary`}
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button className={`px-3 py-1.5 text-xs font-medium rounded-md border ${currentTheme.border} text-text-muted opacity-50 cursor-not-allowed`}>Update</button>
+                            <button className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border ${currentTheme.border} text-text-muted hover:bg-white/5 hover:text-text-main`}>
+                                <EyeOff size={12} /> Hide chart
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="h-64 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={chartData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }} barCategoryGap="0%" barGap={0}>
+                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#2d2d3b" />
+                                <XAxis
+                                    dataKey="time"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                                    interval={2}
+                                />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                                    domain={[0, 15]}
+                                    ticks={[0, 5, 10, 15]}
+                                />
+                                <Tooltip
+                                    cursor={(props) => {
+                                        const { x, y, width, height } = props;
+                                        return (
+                                            <g>
+                                                {/* Vertical Line */}
+                                                <line x1={x + width / 2} y1={0} x2={x + width / 2} y2={height} stroke="#cbd5e1" strokeWidth={1} strokeDasharray="4 4" />
+                                                {/* Horizontal Line at the top intersection for the cross effect */}
+                                                <line x1={0} y1={y} x2="100%" y2={y} stroke="#cbd5e1" strokeWidth={1} strokeDasharray="4 4" />
+                                                {/* Circle at top */}
+                                                <circle cx={x + width / 2} cy={y} r={3} fill="#1e293b" stroke="#cbd5e1" strokeWidth={1} />
+                                            </g>
+                                        );
+                                    }}
+                                    content={({ active, payload, label }) => {
+                                        if (active && payload && payload.length) {
+                                            return (
+                                                <div className="bg-[#1e293b] border border-[#2d2d3b] rounded-md shadow-xl p-3 min-w-[200px] z-50">
+                                                    <div className="text-xs text-gray-400 mb-2 font-medium">
+                                                        <span className="bg-gray-700 text-gray-300 px-1 rounded mr-2">5min</span>
+                                                        Today, {label} to {payload[0].payload.endTime}
+                                                    </div>
+                                                    <div className="flex items-center justify-between text-sm">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-2 h-2 rounded-full bg-[#ef4444]"></div>
+                                                            <span className="text-white font-semibold">ACTIVE</span>
+                                                        </div>
+                                                        <span className="text-white font-bold">{payload[0].value}</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    }}
+                                />
+                                <Bar
+                                    dataKey="count"
+                                    fill="#b91c1c"
+                                    radius={[0, 0, 0, 0]}
+                                    background={{ fill: '#1f2937' }}
+                                    activeBar={false} // Disable white highlight on hover
+                                />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Table Section */}
+                <div className={`overflow-hidden rounded-lg bg-card-bg border ${currentTheme.border} shadow-sm`}>
+                    <div className="flex justify-end p-2 border-b border-border-muted">
+                        <button className="flex items-center gap-1 text-xs font-medium text-text-muted hover:text-text-main">
+                            <List size={12} /> 5 columns hidden
+                        </button>
+                        <button className="ml-3 text-text-muted hover:text-text-main">
+                            <Download size={14} />
+                        </button>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-white/5 border-b border-border-muted text-xs uppercase text-text-muted font-semibold">
+                                <tr>
+                                    <th className="px-4 py-3 w-8">
+                                        <input type="checkbox" className={`rounded bg-app-bg border-border-mutedChecked:bg-primary checked:border-primary`} />
+                                    </th>
+                                    <th className="px-4 py-3">ID</th>
+                                    <th className="px-4 py-3">Name</th>
+                                    <th className="px-4 py-3">Status</th>
+                                    <th className="px-4 py-3">Category</th>
+                                    <th className="px-4 py-3 text-center">Affected</th>
+                                    <th className="px-4 py-3 text-right">Started</th>
+                                    <th className="px-4 py-3 text-right">Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border-muted">
+                                {problems.map((problem) => (
+                                    <tr key={problem.id} onClick={() => setSelectedProblem(problem)} className="hover:bg-white/5 transition-colors group cursor-pointer">
+                                        <td className="px-4 py-3">
+                                            <input type="checkbox" className="rounded bg-app-bg border-border-muted" />
+                                        </td>
+                                        <td className="px-4 py-3 font-mono text-xs text-text-muted">{problem.id}</td>
+                                        <td className="px-4 py-3 font-medium text-text-main max-w-xs truncate" title={problem.name}>
+                                            {problem.name}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${problem.status === 'Active'
+                                                ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                : 'bg-white/5 text-text-muted border-border-muted'
+                                                }`}>
+                                                {problem.status === 'Active' ? <AlertOctagon size={10} /> : null}
+                                                {problem.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-text-muted group-hover:text-text-main transition-colors">
+                                            <div className="flex items-center gap-1.5">
+                                                {problem.category === 'Resource contention' && <Monitor size={12} />}
+                                                {problem.category === 'Custom' && <LayoutGrid size={12} />}
+                                                {problem.category === 'Availability' && <Activity size={12} />}
+                                                {problem.category === 'Custom alert' && <AlertOctagon size={12} />}
+                                                <span className="truncate max-w-[120px]">{problem.category}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 text-center text-text-muted group-hover:text-text-main">{problem.affected}</td>
+                                        <td className="px-4 py-3 text-right text-text-muted whitespace-nowrap">{problem.started}</td>
+                                        <td className="px-4 py-3 text-right text-text-muted font-mono text-xs">{problem.duration}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Problems;
