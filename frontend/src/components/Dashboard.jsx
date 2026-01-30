@@ -86,7 +86,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="h-full overflow-y-auto pr-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left Column: Service Health */}
             <Card title="Microservice Health" className="h-full">
                 <div className="space-y-4">

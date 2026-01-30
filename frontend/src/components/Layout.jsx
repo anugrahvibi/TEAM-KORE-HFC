@@ -5,10 +5,10 @@ const Layout = ({ children, activeTab, onTabChange, user, onLogout }) => {
     const tabs = ['Engineer View', 'Problems', 'Prioritization'];
 
     return (
-        <div className="min-h-screen bg-app-bg text-text-main font-sans selection:bg-primary selection:text-white">
+        <div className="h-screen flex flex-col overflow-hidden bg-app-bg text-text-main font-sans selection:bg-primary selection:text-white">
             {/* Top Navigation Bar */}
-            <nav className="border-b border-border-muted bg-app-bg/80 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav className="border-b border-border-muted bg-app-bg/80 backdrop-blur-md flex-shrink-0 z-50">
+                <div className="w-full px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 items-center justify-between">
                         {/* Title */}
                         <div className="flex items-center gap-3">
@@ -80,8 +80,8 @@ const Layout = ({ children, activeTab, onTabChange, user, onLogout }) => {
             </nav>
 
             {/* Main Content Area */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <main className="flex-1 overflow-hidden flex flex-col w-full px-4 sm:px-6 lg:px-8 py-6">
+                <div className="flex-1 min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {children}
                 </div>
             </main>

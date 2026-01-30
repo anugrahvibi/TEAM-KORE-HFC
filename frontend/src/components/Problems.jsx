@@ -13,7 +13,8 @@ const Problems = () => {
     // We prefer using 'bg-card-bg', 'text-text-main' etc directly in classNames now for consistency.
 
     // Chart Colors from CSS var (simulated for recharts)
-    const chartFillColor = '#e02020'; // Matching global primary
+    // Chart Colors from CSS var (simulated for recharts)
+    const chartFillColor = '#dc172a'; // Dynatrace Red
 
     // Mock Data for the Chart - 5 min intervals for 2 hours (24 points)
     const chartData = Array.from({ length: 24 }, (_, i) => {
@@ -58,11 +59,17 @@ const Problems = () => {
         { id: 'P-2575000', name: 'Disk space critical', status: 'Closed', category: 'Resource contention', affected: '1 host', started: 'Dec 20, 08:30', duration: '12 h 15 min' },
     ];
 
-    const filteredProblems = allProblems.filter(problem => {
-        const matchesStatus = activeFilter === 'All' || problem.status === activeFilter;
-        const matchesCategory = selectedCategory.length === 0 || selectedCategory.includes(problem.category);
-        return matchesStatus && matchesCategory;
-    });
+    const filteredProblems = allProblems
+        .filter(problem => {
+            const matchesStatus = activeFilter === 'All' || problem.status === activeFilter;
+            const matchesCategory = selectedCategory.length === 0 || selectedCategory.includes(problem.category);
+            return matchesStatus && matchesCategory;
+        })
+        .sort((a, b) => {
+            if (a.status === 'Active' && b.status !== 'Active') return -1;
+            if (a.status !== 'Active' && b.status === 'Active') return 1;
+            return 0;
+        });
 
     const categories = ['Resource contention', 'Custom', 'Availability', 'Custom alert'];
 
@@ -138,7 +145,7 @@ const Problems = () => {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 min-w-0 space-y-4">
+            <div className="flex-1 min-w-0 flex flex-col space-y-4 min-h-0">
                 {/* Top Header Panel */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-card-bg border border-border-muted shadow-sm">
                     <div className="flex items-center gap-4">
@@ -147,7 +154,7 @@ const Problems = () => {
                         </div>
                         <div className="flex items-baseline gap-2">
                             <h2 className="text-lg font-bold text-text-main">Problems</h2>
-                            <span className="px-2 py-0.5 text-xs font-semibold bg-red-500/10 text-red-500 rounded-full border border-red-500/20">
+                            <span className="px-2 py-0.5 text-xs font-semibold bg-[#dc172a]/10 text-[#dc172a] rounded-full border border-[#dc172a]/20">
                                 <Activity size={10} className="inline mr-1" />
                                 {allProblems.filter(p => p.status === 'Active').length} active
                             </span>
@@ -168,7 +175,7 @@ const Problems = () => {
                 </div>
 
                 {/* Chart Section */}
-                <div className="p-4 rounded-lg bg-card-bg border border-border-muted shadow-sm">
+                <div className="p-4 rounded-lg bg-card-bg border border-border-muted shadow-sm flex-shrink-0">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2 relative w-full max-w-md">
                             <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
@@ -252,8 +259,8 @@ const Problems = () => {
                 </div>
 
                 {/* Table Section */}
-                <div className="overflow-hidden rounded-lg bg-card-bg border border-border-muted shadow-sm">
-                    <div className="flex justify-end p-2 border-b border-border-muted">
+                <div className="flex flex-col flex-1 min-h-0 bg-card-bg border border-border-muted shadow-sm rounded-lg overflow-hidden relative">
+                    <div className="flex justify-end p-2 border-b border-border-muted flex-shrink-0 z-20 bg-card-bg relative">
                         <button className="flex items-center gap-1 text-xs font-medium text-text-muted hover:text-text-main">
                             <List size={12} /> 5 columns hidden
                         </button>
@@ -261,20 +268,22 @@ const Problems = () => {
                             <Download size={14} />
                         </button>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-white/5 border-b border-border-muted text-xs uppercase text-text-muted font-semibold">
+
+                    {/* Scrollable Table Container - Absolute positioning to force fit */}
+                    <div className="absolute inset-0 top-[33px] overflow-auto">
+                        <table className="min-w-[1000px] w-full text-sm text-left relative table-fixed">
+                            <thead className="bg-[#14151a] border-b border-border-muted text-xs uppercase text-text-muted font-semibold sticky top-0 z-10">
                                 <tr>
-                                    <th className="px-4 py-3 w-8">
+                                    <th className="px-4 py-3 w-12 bg-[#14151a]">
                                         <input type="checkbox" className="rounded bg-app-bg border-border-muted checked:bg-primary checked:border-primary" />
                                     </th>
-                                    <th className="px-4 py-3">ID</th>
-                                    <th className="px-4 py-3">Name</th>
-                                    <th className="px-4 py-3">Status</th>
-                                    <th className="px-4 py-3">Category</th>
-                                    <th className="px-4 py-3 text-center">Affected</th>
-                                    <th className="px-4 py-3 text-right">Started</th>
-                                    <th className="px-4 py-3 text-right">Duration</th>
+                                    <th className="px-4 py-3 w-28 bg-[#14151a]">ID</th>
+                                    <th className="px-4 py-3 w-auto bg-[#14151a]">Name</th>
+                                    <th className="px-4 py-3 w-32 bg-[#14151a]">Status</th>
+                                    <th className="px-4 py-3 w-40 bg-[#14151a]">Category</th>
+                                    <th className="px-4 py-3 w-32 text-center bg-[#14151a]">Affected</th>
+                                    <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Started</th>
+                                    <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Duration</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-muted">
@@ -283,31 +292,31 @@ const Problems = () => {
                                         <td className="px-4 py-3">
                                             <input type="checkbox" className="rounded bg-app-bg border-border-muted" />
                                         </td>
-                                        <td className="px-4 py-3 font-mono text-xs text-text-muted">{problem.id}</td>
-                                        <td className="px-4 py-3 font-medium text-text-main max-w-xs truncate" title={problem.name}>
+                                        <td className="px-4 py-3 font-mono text-sm text-text-muted">{problem.id}</td>
+                                        <td className="px-4 py-3 font-medium text-text-main max-w-xs truncate text-base" title={problem.name}>
                                             {problem.name}
                                         </td>
                                         <td className="px-4 py-3">
-                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${problem.status === 'Active'
-                                                ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-sm font-medium border ${problem.status === 'Active'
+                                                ? 'bg-[#dc172a]/10 text-[#dc172a] border-[#dc172a]/20'
                                                 : 'bg-white/5 text-text-muted border-border-muted'
                                                 }`}>
-                                                {problem.status === 'Active' ? <AlertOctagon size={10} /> : <Clock size={10} />}
+                                                {problem.status === 'Active' ? <AlertOctagon size={12} /> : <Clock size={12} />}
                                                 {problem.status}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-text-muted group-hover:text-text-main transition-colors">
-                                            <div className="flex items-center gap-1.5">
-                                                {problem.category === 'Resource contention' && <Monitor size={12} />}
-                                                {problem.category === 'Custom' && <LayoutGrid size={12} />}
-                                                {problem.category === 'Availability' && <Activity size={12} />}
-                                                {problem.category === 'Custom alert' && <AlertOctagon size={12} />}
-                                                <span className="truncate max-w-[120px]">{problem.category}</span>
+                                        <td className="px-4 py-3 text-text-muted group-hover:text-text-main transition-colors text-sm">
+                                            <div className="flex items-center gap-2">
+                                                {problem.category === 'Resource contention' && <Monitor size={14} />}
+                                                {problem.category === 'Custom' && <LayoutGrid size={14} />}
+                                                {problem.category === 'Availability' && <Activity size={14} />}
+                                                {problem.category === 'Custom alert' && <AlertOctagon size={14} />}
+                                                <span className="truncate max-w-[140px]">{problem.category}</span>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3 text-center text-text-muted group-hover:text-text-main">{problem.affected}</td>
-                                        <td className="px-4 py-3 text-right text-text-muted whitespace-nowrap">{problem.started}</td>
-                                        <td className="px-4 py-3 text-right text-text-muted font-mono text-xs">{problem.duration}</td>
+                                        <td className="px-4 py-3 text-center text-text-muted group-hover:text-text-main text-sm">{problem.affected}</td>
+                                        <td className="px-4 py-3 text-right text-text-muted whitespace-nowrap text-sm">{problem.started}</td>
+                                        <td className="px-4 py-3 text-right text-text-muted font-mono text-sm">{problem.duration}</td>
                                     </tr>
                                 ))}
                             </tbody>
