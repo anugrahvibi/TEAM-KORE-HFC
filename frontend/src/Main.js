@@ -16,7 +16,7 @@ function MainApp() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState(null);
     const [authView, setAuthView] = useState('login'); // 'login' or 'register'
-    const [activeTab, setActiveTab] = useState('Engineer View');
+    const [activeTab, setActiveTab] = useState('Dashboard');
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -56,7 +56,7 @@ function MainApp() {
         setUser(null);
         localStorage.removeItem('isAuthenticated');
         localStorage.removeItem('user');
-        setActiveTab('Engineer View'); // Reset tab
+        setActiveTab('Dashboard'); // Reset tab
     };
 
     if (!isMounted) {
@@ -83,7 +83,7 @@ function MainApp() {
 
     const renderContent = () => {
         switch (activeTab) {
-            case 'Engineer View':
+            case 'Dashboard':
                 return <Dashboard />;
 
             case 'Problems':
@@ -91,9 +91,6 @@ function MainApp() {
 
             case 'Prioritization':
                 return <Prioritization />;
-
-            case 'Blast Radius Predictor':
-                return <BlastRadius />;
 
             default:
                 return null;

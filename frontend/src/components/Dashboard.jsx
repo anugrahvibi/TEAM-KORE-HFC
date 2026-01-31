@@ -1,223 +1,280 @@
 import React, { useState, useEffect } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { toast } from 'sonner';
+import { Activity, Server, Zap, CheckCircle, AlertTriangle, Clock, ArrowUp, ArrowDown, Cpu, Layers } from 'lucide-react';
 import Card from './Card';
 
 const Dashboard = () => {
-    // Initial zero data for animation
-    const generateZeroData = () => {
-        return Array.from({ length: 20 }, (_, i) => ({
-            time: `${10 + Math.floor(i / 4)}:${(i % 4) * 15}`.replace(/:0$/, ':00'),
-            usage: 0,
-        }));
-    };
-
-    // Initial normal data
-    const generateNormalData = () => {
-        return Array.from({ length: 20 }, (_, i) => ({
-            time: `${10 + Math.floor(i / 4)}:${(i % 4) * 15}`.replace(/:0$/, ':00'),
-            usage: 20 + Math.random() * 15,
-        }));
-    };
-
-    // Disaster data with spike
-    const generateDisasterData = () => {
-        const data = generateNormalData();
-        // Add spike at the end
-        for (let i = 15; i < 20; i++) {
-            data[i].usage = 85 + Math.random() * 15;
-        }
-        return data;
-    };
+    // Top-level mock metrics
+    const [metrics, setMetrics] = useState({
+        responseTime: 124,
+        successRate: 99.98,
+        activeIncidents: 0,
+        cpuUsage: 42
+    });
 
     const [isDisasterMode, setIsDisasterMode] = useState(false);
-    const [cpuData, setCpuData] = useState(generateZeroData());
     const [activeDeploy, setActiveDeploy] = useState(false);
+    const [chartData, setChartData] = useState([]);
 
+    // Generate initial chart data
     useEffect(() => {
-        // Delay to allow 'zero' state to render, then animate vertically to real values
-        const timer = setTimeout(() => {
-            if (isDisasterMode) {
-                setCpuData(generateDisasterData());
-            } else {
-                setCpuData(generateNormalData());
-            }
-        }, 500); // Increased to 500ms to ensure wipe doesn't happen, only interpolation
-        return () => clearTimeout(timer);
-    }, [isDisasterMode]);
+        const generateData = () => {
+            return Array.from({ length: 24 }, (_, i) => ({
+                time: `${i}:00`,
+                traffic: 2000 + Math.random() * 1000,
+                cpu: 30 + Math.random() * 20,
+                latency: 100 + Math.random() * 50
+            }));
+        };
+        setChartData(generateData());
+    }, []);
 
-    const services = [
-        { name: 'API Gateway', id: 'api' },
-        { name: 'Auth Service', id: 'auth' },
-        { name: 'Payment Service', id: 'payment' },
-        { name: 'Checkout Service', id: 'checkout' },
-        { name: 'Database Cluster', id: 'db' },
-    ];
+    // Live Data Simulation
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setMetrics(prev => ({
+                responseTime: isDisasterMode ? Math.floor(800 + Math.random() * 400) : Math.floor(120 + Math.random() * 30),
+                successRate: isDisasterMode ? 85.5 : 99.98,
+                activeIncidents: isDisasterMode ? 1 : 0,
+                cpuUsage: isDisasterMode ? Math.floor(90 + Math.random() * 10) : Math.floor(40 + Math.random() * 10)
+            }));
+
+            setChartData(prev => {
+                const newData = [...prev.slice(1)];
+                const lastTime = parseInt(prev[prev.length - 1].time) + 1;
+                newData.push({
+                    time: `${lastTime % 24}:00`,
+                    traffic: 2000 + Math.random() * 1000,
+                    cpu: isDisasterMode ? 90 + Math.random() * 10 : 30 + Math.random() * 20,
+                    latency: isDisasterMode ? 1000 + Math.random() * 500 : 100 + Math.random() * 50
+                });
+                return newData;
+            });
+        }, 2000);
+
+        return () => clearInterval(interval);
+    }, [isDisasterMode]);
 
     const handleDeploy = () => {
         setActiveDeploy(true);
-
-        // Simulate deployment delay
         setTimeout(() => {
             setActiveDeploy(false);
             setIsDisasterMode(true);
             toast.error('Alert: Latency spike detected in payment-service', {
                 description: 'Critical threshold exceeded. Check logs immediately.',
                 duration: 5000,
-                style: {
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                    color: '#fca5a5',
-                },
+                style: { background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#fca5a5' },
             });
-        }, 1500); // 1.5s delay for effect
+        }, 1500);
     };
 
     const handleRollback = () => {
         setIsDisasterMode(false);
         toast.success('Rollback successful', {
             description: 'Services returning to normal operational levels.',
-            style: {
-                background: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
-                color: '#6ee7b7',
-            },
+            style: { background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#6ee7b7' },
         });
     };
 
-    return (
-        <div className="h-full overflow-y-auto pr-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column: Service Health */}
-            <Card title="Microservice Health" className="h-full">
-                <div className="space-y-4">
-                    {services.map((service) => (
-                        <div
-                            key={service.name}
-                            className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-300 ${isDisasterMode && service.id === 'payment'
-                                ? 'bg-red-500/10 border-red-500/30'
-                                : 'bg-slate-900/50 border-slate-700/50 hover:bg-slate-800'
-                                }`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="relative">
-                                    <div
-                                        className={`w-3 h-3 rounded-full ${isDisasterMode && service.id === 'payment'
-                                            ? 'bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]'
-                                            : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
-                                            }`}
-                                    />
-                                    {isDisasterMode && service.id === 'payment' && (
-                                        <div className="absolute inset-0 w-3 h-3 bg-red-500 rounded-full animate-ping opacity-75"></div>
-                                    )}
-                                </div>
-                                <span className={`font-medium ${isDisasterMode && service.id === 'payment' ? 'text-red-200' : 'text-slate-200'
-                                    }`}>
-                                    {service.name}
-                                </span>
-                            </div>
-                            <span
-                                className={`text-xs px-2 py-1 rounded-full border ${isDisasterMode && service.id === 'payment'
-                                    ? 'bg-red-500/20 text-red-300 border-red-500/20'
-                                    : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                    }`}
-                            >
-                                {isDisasterMode && service.id === 'payment' ? 'Error' : 'Operational'}
-                            </span>
-                        </div>
-                    ))}
+    const services = [
+        { name: 'API Gateway', id: 'api', status: 'Operational', uptime: '99.99%' },
+        { name: 'Auth Service', id: 'auth', status: 'Operational', uptime: '99.95%' },
+        { name: 'Payment Service', id: 'payment', status: isDisasterMode ? 'Degraded' : 'Operational', uptime: isDisasterMode ? '85.00%' : '99.99%' },
+        { name: 'Checkout Service', id: 'checkout', status: 'Operational', uptime: '99.90%' },
+        { name: 'Database Cluster', id: 'db', status: 'Operational', uptime: '99.99%' },
+        { name: 'Notification Svc', id: 'notif', status: 'Operational', uptime: '99.92%' },
+    ];
 
-                    <div className="mt-8 pt-4 border-t border-slate-700/50">
-                        {!isDisasterMode ? (
-                            <button
-                                onClick={handleDeploy}
-                                disabled={activeDeploy}
-                                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold shadow-sm transition-colors duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {activeDeploy ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        Deploying v2.4...
-                                    </>
-                                ) : (
-                                    <>
-                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                        Deploy v2.4
-                                    </>
-                                )}
-                            </button>
-                        ) : (
-                            <button
-                                onClick={handleRollback}
-                                className="w-full py-3 px-4 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg font-semibold shadow-sm transition-colors duration-200 border border-slate-600 hover:border-slate-500 flex items-center justify-center gap-2"
-                            >
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                                Rollback to v2.3
-                            </button>
-                        )}
+    return (
+        <div className="flex flex-col gap-6 h-full text-text-main">
+
+            {/* Top Metrics Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
+                <MetricCard
+                    label="System Status"
+                    value={isDisasterMode ? "Critical" : "Operational"}
+                    icon={Activity}
+                    trend={isDisasterMode ? "Issues detected" : "All systems normal"}
+                    color={isDisasterMode ? "text-red-500" : "text-emerald-500"}
+                    bg={isDisasterMode ? "bg-red-500/10" : "bg-emerald-500/10"}
+                />
+                <MetricCard
+                    label="Avg. Response Time"
+                    value={`${metrics.responseTime}ms`}
+                    icon={Zap}
+                    trend={isDisasterMode ? "+850ms vs avg" : "-12ms vs avg"}
+                    color={metrics.responseTime > 500 ? "text-amber-500" : "text-blue-500"}
+                    bg={metrics.responseTime > 500 ? "bg-amber-500/10" : "bg-blue-500/10"}
+                />
+                <MetricCard
+                    label="Success Rate"
+                    value={`${metrics.successRate}%`}
+                    icon={CheckCircle}
+                    trend={isDisasterMode ? "-14.5% drop" : "Stable"}
+                    color={metrics.successRate < 99 ? "text-red-500" : "text-emerald-500"}
+                    bg={metrics.successRate < 99 ? "bg-red-500/10" : "bg-emerald-500/10"}
+                />
+                <MetricCard
+                    label="CPU Usage"
+                    value={`${metrics.cpuUsage}%`}
+                    icon={Cpu}
+                    trend={isDisasterMode ? "High Load" : "Normal Load"}
+                    color={metrics.cpuUsage > 80 ? "text-red-500" : "text-purple-500"}
+                    bg={metrics.cpuUsage > 80 ? "bg-red-500/10" : "bg-purple-500/10"}
+                />
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[400px]">
+                {/* Main and Secondary Charts */}
+                <div className="lg:col-span-2 flex flex-col gap-6">
+                    <Card title="Traffic & Load Overview" className="flex-1 min-h-[300px]">
+                        <div className="h-full w-full min-h-[250px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorTraffic" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={isDisasterMode ? "#ef4444" : "#3b82f6"} stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor={isDisasterMode ? "#ef4444" : "#3b82f6"} stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#2d2d3b" vertical={false} />
+                                    <XAxis dataKey="time" stroke="#64748b" tickLine={false} axisLine={false} fontSize={12} interval={3} />
+                                    <YAxis stroke="#64748b" tickLine={false} axisLine={false} fontSize={12} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                        itemStyle={{ color: '#e2e8f0' }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="cpu"
+                                        stroke={isDisasterMode ? "#ef4444" : "#3b82f6"}
+                                        strokeWidth={3}
+                                        fillOpacity={1}
+                                        fill="url(#colorTraffic)"
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </Card>
+                </div>
+
+                {/* Right Column: Deployment & Activity */}
+                <div className="flex flex-col gap-6">
+                    {/* Deployment Control */}
+                    <div className="bg-card-bg border border-border-muted rounded-xl p-6 shadow-sm hover:border-primary/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                        <h3 className="text-lg font-semibold text-text-main mb-4 flex items-center gap-2">
+                            <Layers size={20} className="text-blue-500" /> Deployment
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="p-3 rounded-lg bg-black/20 border border-border-muted">
+                                <div className="flex justify-between text-sm mb-1">
+                                    <span className="text-text-muted">Current Version</span>
+                                    <span className="font-mono text-emerald-400">v2.3.0</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-text-muted">Last Deployed</span>
+                                    <span className="text-text-main">2 days ago</span>
+                                </div>
+                            </div>
+
+                            {!isDisasterMode ? (
+                                <button
+                                    onClick={handleDeploy}
+                                    disabled={activeDeploy}
+                                    className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-white rounded-lg font-semibold shadow-lg shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {activeDeploy ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Deploying v2.4...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ArrowUp size={18} /> Deploy v2.4 (Canary)
+                                        </>
+                                    )}
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleRollback}
+                                    className="w-full py-3 px-4 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold shadow-lg shadow-red-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 animate-pulse"
+                                >
+                                    <ArrowDown size={18} /> Rollback to v2.3
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Recent Events (Simplified) */}
+                    <div className="bg-card-bg border border-border-muted rounded-xl p-6 shadow-sm flex-1 hover:border-primary/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                        <h3 className="text-lg font-semibold text-text-main mb-4 flex items-center gap-2">
+                            <Activity size={20} className="text-purple-500" /> Activity
+                        </h3>
+                        <div className="space-y-4">
+                            {[
+                                { text: 'Database backup completed', time: '10m ago', type: 'success' },
+                                { text: 'Latency spike warning', time: '1h ago', type: 'warning' },
+                                { text: 'User scaling policy triggered', time: '2h ago', type: 'info' }
+                            ].map((event, i) => (
+                                <div key={i} className="flex gap-3 items-start">
+                                    <div className={`mt-1 w-2 h-2 rounded-full ${event.type === 'success' ? 'bg-emerald-500' : event.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`} />
+                                    <div>
+                                        <p className="text-sm text-text-main">{event.text}</p>
+                                        <p className="text-xs text-text-muted">{event.time}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </Card>
+            </div>
 
-            {/* Right Column: Chart */}
-            <Card title="CPU Usage (Real-time)" className="h-full min-h-[400px]">
-                <div className="h-[350px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart
-                            data={cpuData}
-                            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                        >
-                            <defs>
-                                <linearGradient id="colorUsage" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor={isDisasterMode ? "#ef4444" : "#3b82f6"} stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor={isDisasterMode ? "#ef4444" : "#3b82f6"} stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
-                            <XAxis
-                                dataKey="time"
-                                stroke="#94a3b8"
-                                fontSize={12}
-                                tickLine={false}
-                                axisLine={false}
-                            />
-                            <YAxis
-                                stroke="#94a3b8"
-                                fontSize={12}
-                                tickLine={false}
-                                axisLine={false}
-                                domain={[0, 100]}
-                                tickFormatter={(value) => `${value}%`}
-                            />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: '#1e293b',
-                                    borderColor: '#334155',
-                                    borderRadius: '0.5rem',
-                                    color: '#f1f5f9'
-                                }}
-                                itemStyle={{ color: '#e2e8f0' }}
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="usage"
-                                stroke={isDisasterMode ? "#ef4444" : "#3b82f6"}
-                                strokeWidth={3}
-                                fillOpacity={1}
-                                fill="url(#colorUsage)"
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
-            </Card>
-
-            {/* Toast Notification Container (will be rendered by parent App usually, but just in case) */}
-            {/* We assume Toaster is at root level */}
+            {/* Service Health Grid */}
+            <h3 className="text-lg font-bold text-text-main mt-4">Service Mesh Health</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {services.map((service) => (
+                    <div
+                        key={service.name}
+                        className={`p-4 rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${isDisasterMode && service.id === 'payment'
+                            ? 'bg-red-500/10 border-red-500/30'
+                            : 'bg-card-bg border-border-muted hover:border-primary/30'
+                            }`}
+                    >
+                        <div className="flex justify-between items-start mb-2">
+                            <Server size={18} className={`flex-shrink-0 ${isDisasterMode && service.id === 'payment' ? 'text-red-400' : 'text-text-muted'}`} />
+                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isDisasterMode && service.id === 'payment' ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'
+                                }`} />
+                        </div>
+                        <h4 className="font-semibold text-sm text-text-main truncate" title={service.name}>{service.name}</h4>
+                        <div className="flex justify-between items-end mt-2">
+                            <span className={`text-xs px-1.5 py-0.5 rounded ${isDisasterMode && service.id === 'payment' ? 'bg-red-500/20 text-red-300' : 'bg-emerald-500/10 text-emerald-400'
+                                }`}>
+                                {isDisasterMode && service.id === 'payment' ? 'Error' : 'Healthy'}
+                            </span>
+                            <span className="text-xs text-text-muted font-mono">{service.uptime}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
+
+const MetricCard = ({ label, value, icon: Icon, trend, color, bg }) => (
+    <div className="bg-card-bg border border-border-muted rounded-xl p-5 shadow-sm hover:border-primary/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+        <div className="flex justify-between items-start mb-2">
+            <div className={`p-2 rounded-lg ${bg} ${color}`}>
+                <Icon size={20} />
+            </div>
+            {trend && <span className={`text-xs font-medium px-2 py-1 rounded-full bg-app-bg text-text-muted border border-border-muted`}>{trend}</span>}
+        </div>
+        <div className="mt-2">
+            <h4 className="text-text-muted text-sm font-medium">{label}</h4>
+            <p className="text-2xl font-bold text-text-main mt-0.5">{value}</p>
+        </div>
+    </div>
+);
 
 export default Dashboard;

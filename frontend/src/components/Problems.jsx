@@ -147,7 +147,7 @@ const Problems = () => {
             {/* Main Content */}
             <div className="flex-1 min-w-0 flex flex-col space-y-4 min-h-0">
                 {/* Top Header Panel */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-card-bg border border-border-muted shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card-bg border border-border-muted shadow-sm">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-white/5 rounded-md text-text-muted">
                             <LayoutGrid size={20} />
@@ -175,7 +175,7 @@ const Problems = () => {
                 </div>
 
                 {/* Chart Section */}
-                <div className="p-4 rounded-lg bg-card-bg border border-border-muted shadow-sm flex-shrink-0">
+                <div className="p-4 rounded-xl bg-card-bg border border-border-muted shadow-sm flex-shrink-0">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2 relative w-full max-w-md">
                             <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
@@ -259,7 +259,7 @@ const Problems = () => {
                 </div>
 
                 {/* Table Section */}
-                <div className="flex flex-col flex-1 min-h-0 bg-card-bg border border-border-muted shadow-sm rounded-lg overflow-hidden relative">
+                <div className="flex flex-col flex-1 min-h-[400px] lg:min-h-0 bg-card-bg border border-border-muted shadow-sm rounded-xl overflow-hidden relative">
                     <div className="flex justify-end p-2 border-b border-border-muted flex-shrink-0 z-20 bg-card-bg relative">
                         <button className="flex items-center gap-1 text-xs font-medium text-text-muted hover:text-text-main">
                             <List size={12} /> 5 columns hidden
@@ -270,8 +270,9 @@ const Problems = () => {
                     </div>
 
                     {/* Scrollable Table Container - Absolute positioning to force fit */}
-                    <div className="absolute inset-0 top-[33px] overflow-auto">
-                        <table className="min-w-[1000px] w-full text-sm text-left relative table-fixed">
+                    <div className="absolute inset-0 top-[37px] overflow-auto" style={{ scrollbarGutter: 'stable' }}>
+                        {/* Desktop Table View (Large Screens) */}
+                        <table className="hidden lg:table w-full text-sm text-left relative table-fixed">
                             <thead className="bg-[#14151a] border-b border-border-muted text-xs uppercase text-text-muted font-semibold sticky top-0 z-10">
                                 <tr>
                                     <th className="px-4 py-3 w-12 bg-[#14151a]">
@@ -321,6 +322,50 @@ const Problems = () => {
                                 ))}
                             </tbody>
                         </table>
+
+                        {/* Mobile/Tablet Card View (Small Screens) */}
+                        <div className="lg:hidden flex flex-col gap-3 p-4">
+                            {filteredProblems.map((problem) => (
+                                <div
+                                    key={problem.id}
+                                    onClick={() => setSelectedProblem(problem)}
+                                    className="bg-card-bg border border-border-muted rounded-xl p-4 space-y-3 hover:bg-white/5 hover:-translate-y-1 hover:shadow-lg active:scale-[0.99] transition-all cursor-pointer shadow-sm"
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${problem.status === 'Active'
+                                                ? 'bg-[#dc172a]/10 text-[#dc172a] border-[#dc172a]/20'
+                                                : 'bg-white/5 text-text-muted border-border-muted'
+                                                }`}>
+                                                {problem.status === 'Active' ? <AlertOctagon size={10} /> : <Clock size={10} />}
+                                                {problem.status}
+                                            </span>
+                                            <span className="font-mono text-xs text-text-muted">{problem.id}</span>
+                                        </div>
+                                        <span className="text-xs text-text-muted whitespace-nowrap">{problem.started}</span>
+                                    </div>
+
+                                    <h3 className="font-medium text-text-main text-base leading-tight">
+                                        {problem.name}
+                                    </h3>
+
+                                    <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-text-muted pt-2 border-t border-border-muted/50">
+                                        <div className="col-span-2 sm:col-span-1 flex items-center gap-2 text-text-main">
+                                            {problem.category === 'Resource contention' && <Monitor size={14} className="text-text-muted" />}
+                                            {problem.category === 'Custom' && <LayoutGrid size={14} className="text-text-muted" />}
+                                            {problem.category === 'Availability' && <Activity size={14} className="text-text-muted" />}
+                                            {problem.category === 'Custom alert' && <AlertOctagon size={14} className="text-text-muted" />}
+                                            <span className="truncate">{problem.category}</span>
+                                        </div>
+
+                                        <div className="col-span-2 sm:col-span-1 flex items-center justify-between sm:justify-end gap-4">
+                                            <span className="text-xs">Affected: <span className="text-text-main">{problem.affected}</span></span>
+                                            <span className="text-xs font-mono bg-white/5 px-1.5 py-0.5 rounded">{problem.duration}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
