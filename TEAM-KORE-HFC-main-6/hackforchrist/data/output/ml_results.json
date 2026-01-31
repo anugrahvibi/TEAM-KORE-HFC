@@ -1,0 +1,17 @@
+{
+    "service": "payment-service",
+    "change_event": {
+        "type": "deployment",
+        "timestamp": "2026-02-01T00:33:29.914728"
+    },
+    "anomaly": {
+        "score": -0.056,
+        "is_anomaly": true
+    },
+    "correlation": {
+        "is_correlated": false,
+        "confidence": 0.4,
+        "delay_minutes": 1
+    },
+    "indicators": []
+}

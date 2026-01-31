@@ -1,8 +1,8 @@
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List, Optional, Dict
+from pydantic import BaseModel, EmailStr
 from database import db
 from correlation_engine import calculate_correlation
 from blast_radius import analyze_blast_radius
@@ -13,6 +13,8 @@ import numpy as np
 import json
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict
+import hashlib
+import secrets
 
 app = FastAPI(title="DevInsight Backend")
 
@@ -74,6 +76,28 @@ class ChangeEvent(BaseModel):
     timestamp: Optional[str] = None
     description: str
     version: str
+
+# Authentication Models
+class UserRegister(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class GoogleAuth(BaseModel):
+    token: str
+    email: EmailStr
+    full_name: Optional[str] = None
+
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    full_name: str
+    avatar: str
+    created_at: datetime
 
 @app.get("/health")
 def health():
@@ -320,6 +344,171 @@ def extract_features(metrics_list: List[Dict]):
     
     return np.array(features).reshape(1, -1)
 
+@app.get("/debug/metrics")
+def debug_metrics():
+    """Debug endpoint to see what's in the database"""
+    try:
+        # Get all metrics without time filter first
+        all_metrics = list(db.metrics.find({}))
+        
+        # Then try with time filter
+        from datetime import datetime, timedelta
+        end_time = datetime.now()
+        start_time = end_time - timedelta(hours=1)
+        
+        metrics_cursor = db.metrics.find({
+            "service": "payment-service",
+            "timestamp": {"$gte": start_time, "$lte": end_time}
+        }).sort("timestamp", -1).limit(10)
+        
+        metrics = list(metrics_cursor)
+        
+        return {
+            "all_count": len(all_metrics),
+            "all_data": all_metrics[:5],  # First 5
+            "filtered_count": len(metrics),
+            "filtered_data": metrics,
+            "start_time": start_time.isoformat(),
+            "end_time": end_time.isoformat()
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+# Authentication Endpoints
+def hash_password(password: str) -> str:
+    """Hash password using SHA-256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def generate_avatar(email: str) -> str:
+    """Generate avatar URL based on email"""
+    return f"https://api.dicebear.com/7.x/avataaars/svg?seed={email}"
+
+@app.post("/auth/register", response_model=UserResponse)
+async def register(user_data: UserRegister):
+    """Register a new user"""
+    try:
+        # Check if user already exists
+        existing_user = db.users.find_one({"email": user_data.email})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        # Hash password
+        hashed_password = hash_password(user_data.password)
+        
+        # Create user document
+        user_doc = {
+            "email": user_data.email,
+            "full_name": user_data.full_name,
+            "password": hashed_password,
+            "avatar": generate_avatar(user_data.email),
+            "created_at": datetime.utcnow(),
+            "auth_provider": "email"
+        }
+        
+        # Insert user
+        result = db.users.insert_one(user_doc)
+        
+        return UserResponse(
+            id=str(result.inserted_id),
+            email=user_data.email,
+            full_name=user_data.full_name,
+            avatar=user_doc["avatar"],
+            created_at=user_doc["created_at"]
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
+
+@app.post("/auth/login", response_model=UserResponse)
+async def login(login_data: UserLogin):
+    """Login user with email and password"""
+    try:
+        # Find user
+        user = db.users.find_one({"email": login_data.email})
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Verify password
+        hashed_password = hash_password(login_data.password)
+        if user["password"] != hashed_password:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        return UserResponse(
+            id=str(user["_id"]),
+            email=user["email"],
+            full_name=user["full_name"],
+            avatar=user["avatar"],
+            created_at=user["created_at"]
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
+
+@app.post("/auth/google", response_model=UserResponse)
+async def google_auth(google_data: GoogleAuth):
+    """Authenticate with Google OAuth"""
+    try:
+        # In a real implementation, you would verify the Google token here
+        # For demo purposes, we'll accept any token and create/update user
+        
+        # Find or create user
+        user = db.users.find_one({"email": google_data.email})
+        
+        if not user:
+            # Create new user
+            user_doc = {
+                "email": google_data.email,
+                "full_name": google_data.full_name or google_data.email.split("@")[0],
+                "password": "",  # No password for OAuth users
+                "avatar": generate_avatar(google_data.email),
+                "created_at": datetime.utcnow(),
+                "auth_provider": "google"
+            }
+            result = db.users.insert_one(user_doc)
+            user_id = str(result.inserted_id)
+        else:
+            # Update existing user
+            user_id = str(user["_id"])
+            db.users.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"last_login": datetime.utcnow()}}
+            )
+        
+        # Get updated user data
+        user = db.users.find_one({"email": google_data.email})
+        
+        return UserResponse(
+            id=user_id,
+            email=user["email"],
+            full_name=user["full_name"],
+            avatar=user["avatar"],
+            created_at=user["created_at"]
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Google auth failed: {str(e)}")
+
+@app.get("/auth/me", response_model=UserResponse)
+async def get_current_user(email: str):
+    """Get current user profile"""
+    try:
+        user = db.users.find_one({"email": email})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return UserResponse(
+            id=str(user["_id"]),
+            email=user["email"],
+            full_name=user["full_name"],
+            avatar=user["avatar"],
+            created_at=user["created_at"]
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get user: {str(e)}")
+
 @app.get("/ml/scan")
 async def scan_now(service: str = "payment-service"):
     """Trigger a manual ML scan, run correlation, and save unified payload."""
@@ -328,15 +517,34 @@ async def scan_now(service: str = "payment-service"):
     if not iso_forest or not rand_forest:
         return {"error": "Models not loaded"}
     
-    # 1. Get metrics window (last 5 mins)
-    resp = get_recent_metrics(service, window=300)
-    metrics = resp.get("metrics", [])
+    # 1. Get metrics from MongoDB (last 50 records for ML scan)
+    from datetime import datetime, timedelta
+    end_time = datetime.now()
+    start_time = end_time - timedelta(hours=24)  # Get last 24 hours of data
+    
+    metrics_cursor = db.metrics.find({
+        "service": service,
+        "timestamp": {"$gte": start_time, "$lte": end_time}
+    }).sort("timestamp", -1).limit(50)
+    
+    metrics = list(metrics_cursor)
     
     if len(metrics) < 5:
-        return {"error": "Insufficient data for ML scan (need at least 5 points)"}
+        return {"error": f"Insufficient data for ML scan (found {len(metrics)} points, need at least 5)"}
     
-    # 2. Extract Features
-    X = extract_features(metrics)
+    # 2. Extract Features - convert MongoDB docs to feature format
+    feature_data = []
+    for metric in metrics:
+        feature_data.append({
+            'cpu_percent': metric.get('cpu_percent', 0),
+            'memory_mb': metric.get('memory_mb', 0),
+            'network_out_mbps': metric.get('network_out_mbps', 0),
+            'request_count': metric.get('request_count', 0),
+            'error_count': metric.get('error_count', 0),
+            'latency_p95_ms': metric.get('latency_p95_ms', 0)
+        })
+    
+    X = extract_features(feature_data)
     current_features = {name: float(val) for name, val in zip(FEATURE_NAMES, X[0])}
     
     # 3. Predict
