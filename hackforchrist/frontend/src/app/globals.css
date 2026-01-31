@@ -71,3 +71,9 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #4b4c55;
 }
+
+@layer utilities {
+  .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl {
+    box-shadow: none !important;
+  }
+}

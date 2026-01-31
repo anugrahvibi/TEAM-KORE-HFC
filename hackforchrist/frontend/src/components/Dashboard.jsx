@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { toast } from 'sonner';
-import { Activity, Server, Zap, CheckCircle, AlertTriangle, Clock, ArrowUp, ArrowDown, Cpu, Layers } from 'lucide-react';
+import { Activity, Server, Zap, CheckCircle, AlertTriangle, Clock, ArrowUp, ArrowDown, Cpu, Layers, DollarSign } from 'lucide-react';
 import Card from './Card';
+import CorrelationAnalysis from './CorrelationAnalysis';
+
+import { getDashboardMetrics } from '../utils/dataProvider';
 
 const Dashboard = () => {
     // Top-level mock metrics
@@ -10,17 +13,15 @@ const Dashboard = () => {
         responseTime: 124,
         successRate: 99.98,
         activeIncidents: 0,
-        cpuUsage: 42
+        cpuUsage: 42,
+        // Added for dataProvider compatibility
+        requests: '2500/s',
+        cost: '$0'
     });
 
     const [isDisasterMode, setIsDisasterMode] = useState(false);
     const [activeDeploy, setActiveDeploy] = useState(false);
     const [chartData, setChartData] = useState([]);
-
-    // Fix for hydration issues and scroll lock from agent overlays
-    useEffect(() => {
-        document.body.classList.remove('antigravity-scroll-lock');
-    }, []);
 
     // Generate initial chart data
     useEffect(() => {
@@ -35,86 +36,23 @@ const Dashboard = () => {
         setChartData(generateData());
     }, []);
 
-    // Live Data Polling from Backend
+    // Load Metrics from Local Data Provider
     useEffect(() => {
-        const fetchMetrics = async () => {
-            try {
-                // Fetch last 60 seconds or so
-                const response = await fetch('http://localhost:8000/metrics/recent?service=payment-service&window=300');
-                if (response.ok) {
-                    const data = await response.json();
-
-                    // Update Top-Level Metrics based on latest data point
-                    if (data.metrics && data.metrics.length > 0) {
-                        const latest = data.metrics[data.metrics.length - 1];
-                        setMetrics({
-                            responseTime: Math.round(latest.latency_p95_ms),
-                            successRate: 99.9, // Backend placeholder
-                            activeIncidents: latest.latency_p95_ms > 500 ? 1 : 0,
-                            cpuUsage: Math.round(latest.cpu_percent)
-                        });
-
-                        // Map backend metrics to Chart Data
-                        const mappedData = data.metrics.map(m => {
-                            const d = new Date(m.timestamp);
-                            return {
-                                time: d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes(),
-                                traffic: m.request_count,
-                                cpu: m.cpu_percent,
-                                latency: m.latency_p95_ms
-                            };
-                        });
-
-                        // Set chart data if we have points
-                        if (mappedData.length > 0) {
-                            setChartData(prev => {
-                                // Simple logic: just show what backend gives for the window
-                                return mappedData;
-                            });
-                        }
-                    }
-                }
-
-                // Alert Check for Disaster Mode
-                const alertResp = await fetch('http://localhost:8000/alerts?limit=1');
-                if (alertResp.ok) {
-                    const alertData = await alertResp.json();
-                    if (alertData.alerts && alertData.alerts.length > 0) {
-                        const lastAlert = alertData.alerts[0];
-                        if (new Date(lastAlert.timestamp).getTime() > Date.now() - 20000) {
-                            setIsDisasterMode(true);
-                        } else {
-                            setIsDisasterMode(false);
-                        }
-                    }
-                }
-
-            } catch (e) {
-                console.error("Backend poll failed", e);
-            }
-        };
-
-        const interval = setInterval(fetchMetrics, 2000);
-        fetchMetrics(); // Initial call
-
-        return () => clearInterval(interval);
+        const data = getDashboardMetrics();
+        setMetrics({
+            responseTime: 124, // keep mock for visual consistency or map from data if available
+            successRate: 99.98,
+            activeIncidents: data.isAnomaly ? 1 : 0,
+            cpuUsage: parseInt(data.cpu.value),
+            requests: data.requests.value,
+            cost: data.cost.value
+        });
+        setIsDisasterMode(data.isAnomaly);
     }, []);
 
     const handleDeploy = async () => {
         setActiveDeploy(true);
-        try {
-            await fetch('http://localhost:8000/ingest/change', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    change_id: `deploy-${Date.now()}`,
-                    service: 'payment-service',
-                    timestamp: new Date().toISOString(),
-                    description: 'Deploying v2.4 (Canary)',
-                    version: 'v2.4'
-                })
-            });
-        } catch (e) { console.error(e); }
+
 
         // Keep UI feedback simulation for immediate response
         setTimeout(() => {
@@ -136,30 +74,6 @@ const Dashboard = () => {
         });
     };
 
-    const [mlResults, setMlResults] = useState(null);
-    const [isScanning, setIsScanning] = useState(false);
-
-    const handleScan = async () => {
-        setIsScanning(true);
-        try {
-            const resp = await fetch('http://localhost:8000/ml/scan?service=payment-service');
-            if (resp.ok) {
-                const data = await resp.json();
-                setMlResults(data);
-                if (data.isolation_forest.is_anomaly) {
-                    toast.warning("Anomaly Detected", {
-                        description: "Isolation Forest flagged recent metrics as an anomaly."
-                    });
-                } else {
-                    toast.success("System Healthy", {
-                        description: "ML models verified system stability."
-                    });
-                }
-            }
-        } catch (e) { console.error(e); }
-        setIsScanning(false);
-    };
-
     const services = [
         { name: 'API Gateway', id: 'api', status: 'Operational', uptime: '99.99%' },
         { name: 'Auth Service', id: 'auth', status: 'Operational', uptime: '99.95%' },
@@ -170,7 +84,7 @@ const Dashboard = () => {
     ];
 
     return (
-        <div className="flex flex-col gap-6 h-full text-text-main">
+        <div className="flex flex-col gap-6 min-h-full text-text-main">
 
             {/* Top Metrics Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
@@ -191,20 +105,20 @@ const Dashboard = () => {
                     bg={metrics.responseTime > 500 ? "bg-amber-500/10" : "bg-blue-500/10"}
                 />
                 <MetricCard
-                    label="Success Rate"
-                    value={`${metrics.successRate}%`}
+                    label="Throughput"
+                    value={metrics.requests}
                     icon={CheckCircle}
-                    trend={isDisasterMode ? "-14.5% drop" : "Stable"}
-                    color={metrics.successRate < 99 ? "text-red-500" : "text-emerald-500"}
-                    bg={metrics.successRate < 99 ? "bg-red-500/10" : "bg-emerald-500/10"}
+                    trend={isDisasterMode ? "+High Load" : "Normal"}
+                    color={isDisasterMode ? "text-amber-500" : "text-emerald-500"}
+                    bg={isDisasterMode ? "bg-amber-500/10" : "bg-emerald-500/10"}
                 />
                 <MetricCard
-                    label="CPU Usage"
-                    value={`${metrics.cpuUsage}%`}
-                    icon={Cpu}
-                    trend={isDisasterMode ? "High Load" : "Normal Load"}
-                    color={metrics.cpuUsage > 80 ? "text-red-500" : "text-purple-500"}
-                    bg={metrics.cpuUsage > 80 ? "bg-red-500/10" : "bg-purple-500/10"}
+                    label="Cloud Cost Efficiency"
+                    value={metrics.cost}
+                    icon={DollarSign}
+                    trend={isDisasterMode ? "Waste Detected" : "Optimal"}
+                    color={isDisasterMode ? "text-amber-500" : "text-emerald-500"}
+                    bg={isDisasterMode ? "bg-amber-500/10" : "bg-emerald-500/10"}
                 />
             </div>
 
@@ -212,8 +126,8 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-[400px]">
                 {/* Main and Secondary Charts */}
                 <div className="lg:col-span-2 flex flex-col gap-6">
-                    <Card title="Traffic & Load Overview" className="min-h-[450px]">
-                        <div className="h-full w-full min-h-[400px]">
+                    <Card title="Traffic & Load Overview" className="flex-1 min-h-[300px]">
+                        <div className="h-full w-full min-h-[250px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                     <defs>
@@ -291,7 +205,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Recent Events (Simplified) */}
-                    <div className="bg-card-bg border border-border-muted rounded-xl p-6 shadow-sm hover:border-primary/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                    <div className="bg-card-bg border border-border-muted rounded-xl p-6 shadow-sm flex-1 hover:border-primary/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
                         <h3 className="text-lg font-semibold text-text-main mb-4 flex items-center gap-2">
                             <Activity size={20} className="text-purple-500" /> Activity
                         </h3>
@@ -309,46 +223,6 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             ))}
-                        </div>
-                    </div>
-
-                    {/* ML Insights Scan */}
-                    <div className="bg-card-bg border border-border-muted rounded-xl p-6 shadow-sm hover:border-primary/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-                        <h3 className="text-lg font-semibold text-text-main mb-4 flex items-center gap-2">
-                            <Zap size={20} className="text-yellow-500" /> ML Anomaly Scan
-                        </h3>
-                        <div className="space-y-4">
-                            {!mlResults ? (
-                                <p className="text-sm text-text-muted text-center py-2">No scan data yet.</p>
-                            ) : (
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-text-muted">Status:</span>
-                                        <span className={mlResults.isolation_forest.is_anomaly ? "text-red-400 font-bold" : "text-emerald-400"}>
-                                            {mlResults.isolation_forest.is_anomaly ? "⚠️ Anomaly" : "✅ Normal"}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-text-muted">RF Prediction:</span>
-                                        <span className="text-text-main font-mono">{mlResults.random_forest.prediction}</span>
-                                    </div>
-                                    <div className="w-full bg-black/20 rounded-full h-1.5 mt-2">
-                                        <div
-                                            className={`h-1.5 rounded-full ${mlResults.isolation_forest.is_anomaly ? "bg-red-500" : "bg-emerald-500"}`}
-                                            style={{ width: `${Math.min(100, Math.max(0, (mlResults.isolation_forest.anomaly_score + 0.5) * 100))}%` }}
-                                        ></div>
-                                    </div>
-                                    <p className="text-[10px] text-text-muted text-right">Confidence Score</p>
-                                </div>
-                            )}
-
-                            <button
-                                onClick={handleScan}
-                                disabled={isScanning}
-                                className="w-full py-2 px-4 border border-border-muted hover:bg-white/5 rounded-lg text-sm transition-all flex items-center justify-center gap-2"
-                            >
-                                {isScanning ? "Scanning..." : "Run ML Discovery Scan"}
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -380,6 +254,11 @@ const Dashboard = () => {
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* Correlation Analysis Section - Added for User Request */}
+            <div className="mt-8">
+                <CorrelationAnalysis />
             </div>
         </div>
     );

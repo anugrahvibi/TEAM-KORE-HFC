@@ -1,12 +1,9 @@
 {
     "service": "auth-service",
     "blast_radius": {
-        "current_state": "Critical",
-        "confidence": 0.68,
-        "trigger_signals": [
-            "Latency p95 increased 3.2x over baseline",
-            "CPU saturation sustained for 8 minutes"
-        ],
+        "current_state": "Healthy",
+        "confidence": 0.95,
+        "trigger_signals": [],
         "predicted_propagation": [
             {
                 "service": "api-gateway",
@@ -54,8 +51,8 @@
         "blast_radius_summary": {
             "total_services_at_risk": 6,
             "max_propagation_depth": 3.0,
-            "estimated_users_affected": 8200,
-            "sla_violation_risk": "Likely"
+            "estimated_users_affected": 0,
+            "sla_violation_risk": "Low"
         }
     }
 }

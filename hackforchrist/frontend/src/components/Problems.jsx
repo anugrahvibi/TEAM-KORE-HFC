@@ -3,11 +3,16 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { Filter, RefreshCcw, Activity, AlertOctagon, Monitor, Clock, ChevronDown, Download, EyeOff, LayoutGrid, List } from 'lucide-react';
 
 import ProblemDetail from './ProblemDetail';
+import { AnimatePresence } from 'framer-motion';
+import BlastRadiusColumn from './BlastRadiusModal';
+import { getAlerts, getBlastRadiusData } from '../utils/dataProvider';
 
 const Problems = () => {
     const [selectedProblem, setSelectedProblem] = useState(null);
+    const [selectedBlastRadiusProblem, setSelectedBlastRadiusProblem] = useState(null);
     const [activeFilter, setActiveFilter] = useState('All');
     const [selectedCategory, setSelectedCategory] = useState([]);
+    const blastData = getBlastRadiusData();
 
     // Theme logic moved to global text utilities
     // We prefer using 'bg-card-bg', 'text-text-main' etc directly in classNames now for consistency.
@@ -36,28 +41,21 @@ const Problems = () => {
             time: label,
             endTime: formatTime(hour + 12, nextMinute),
             // Randomize slightly for visual interest but keep it close to screenshot's "heavy" load
-            count: 10 + Math.floor(Math.random() * 5),
+            count: 10 + (i % 5),
         };
     });
 
-    // Mock Data for the Table
-    const allProblems = [
-        { id: 'P-2601869', name: 'Cisco Memory Free critical low', status: 'Active', category: 'Custom', affected: '1 service', started: 'Jan 15, 21:32', duration: '2 w 1 d' },
-        { id: 'P-2601844', name: 'Memory saturation', status: 'Active', category: 'Resource contention', affected: '1 host', started: 'Jan 16, 06:15', duration: '2 w 18 h' },
-        { id: 'P-2601843', name: 'Memory saturation', status: 'Active', category: 'Resource contention', affected: '1 host', started: 'Jan 16, 06:14', duration: '2 w 18 h' },
-        { id: 'P-2601800', name: 'CPU saturation', status: 'Closed', category: 'Resource contention', affected: '1 host', started: 'Jan 16, 04:10', duration: '1 h 12 min' },
-        { id: 'P-2600212', name: 'User action duration degradation', status: 'Active', category: 'Custom', affected: '1 application', started: 'Jan 14, 02:49', duration: '2 w 3 d' },
-        { id: 'P-2599602', name: 'Failure rate increase', status: 'Active', category: 'Availability', affected: '1 service', started: 'Jan 13, 09:30', duration: '2 w 4 d' },
-        { id: 'P-2599601', name: 'Failure rate increase', status: 'Active', category: 'Availability', affected: '1 service', started: 'Jan 13, 09:30', duration: '2 w 4 d' },
-        { id: 'P-2599600', name: 'Failure rate increase', status: 'Active', category: 'Availability', affected: '1 service', started: 'Jan 13, 09:30', duration: '2 w 4 d' },
-        { id: 'P-2599599', name: 'Failure rate increase', status: 'Active', category: 'Availability', affected: '1 service', started: 'Jan 13, 09:30', duration: '2 w 4 d' },
-        { id: 'P-2599598', name: 'Failure rate increase', status: 'Active', category: 'Availability', affected: '1 service', started: 'Jan 13, 09:30', duration: '2 w 4 d' },
-        { id: 'P-2598379', name: 'Synthetic monitor outage', status: 'Active', category: 'Availability', affected: '1 monitor', started: 'Jan 12, 11:21', duration: '2 w 5 d' },
-        { id: 'P-2593412', name: 'Host or monitoring unavailable', status: 'Active', category: 'Availability', affected: '1 host', started: 'Jan 07, 09:12', duration: '3 w 3 d' },
-        { id: 'P-2586616', name: 'High connectivity failures', status: 'Active', category: 'Custom alert', affected: '1 entity', started: 'Dec 30, 23:25', duration: '4 w 3 d' },
-        { id: 'P-2580000', name: 'Process crash loop', status: 'Closed', category: 'Availability', affected: '3 services', started: 'Dec 25, 12:45', duration: '4 h 20 min' },
-        { id: 'P-2575000', name: 'Disk space critical', status: 'Closed', category: 'Resource contention', affected: '1 host', started: 'Dec 20, 08:30', duration: '12 h 15 min' },
-    ];
+    // Load from local data
+    const alerts = getAlerts();
+    const allProblems = alerts.map(a => ({
+        id: a.id,
+        name: a.name,
+        status: 'Active',
+        category: 'Availability',
+        affected: a.affectedStr,
+        started: 'Just now', // Simplified
+        duration: '1m'
+    }));
 
     const filteredProblems = allProblems
         .filter(problem => {
@@ -284,7 +282,9 @@ const Problems = () => {
                                     <th className="px-4 py-3 w-40 bg-[#14151a]">Category</th>
                                     <th className="px-4 py-3 w-32 text-center bg-[#14151a]">Affected</th>
                                     <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Started</th>
+                                    <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Started</th>
                                     <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Duration</th>
+                                    <th className="px-4 py-3 w-24 bg-[#14151a]">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-muted">
@@ -318,6 +318,21 @@ const Problems = () => {
                                         <td className="px-4 py-3 text-center text-text-muted group-hover:text-text-main text-sm">{problem.affected}</td>
                                         <td className="px-4 py-3 text-right text-text-muted whitespace-nowrap text-sm">{problem.started}</td>
                                         <td className="px-4 py-3 text-right text-text-muted font-mono text-sm">{problem.duration}</td>
+                                        <td className="px-4 py-3 text-center">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedBlastRadiusProblem(problem);
+                                                }}
+                                                className="p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-primary/20 hover:border-primary/50 text-text-muted hover:text-white transition-all group relative"
+                                                title="Analyze Blast Radius"
+                                            >
+                                                <Activity size={14} className="group-hover:text-primary" />
+                                                {problem.status === 'Active' && problem.category === 'Availability' && (
+                                                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                                )}
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -369,6 +384,24 @@ const Problems = () => {
                     </div>
                 </div>
             </div>
+            {/* Blast Radius Modal for Problems */}
+            <AnimatePresence>
+                {selectedBlastRadiusProblem && (
+                    <BlastRadiusColumn
+                        isOpen={!!selectedBlastRadiusProblem}
+                        onClose={() => setSelectedBlastRadiusProblem(null)}
+                        scenarioData={{
+                            service: selectedBlastRadiusProblem.affected,
+                            description: selectedBlastRadiusProblem.name,
+                            version: 'Detected Risk',
+                            type: selectedBlastRadiusProblem.category,
+                            riskLevel: selectedBlastRadiusProblem.status === 'Active' ? 'Critical' : 'Low',
+                            graph: blastData.graph,
+                            insights: blastData.insights
+                        }}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 };

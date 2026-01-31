@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Layout = ({ children, activeTab, onTabChange, user, onLogout }) => {
-    const tabs = ['Dashboard', 'Problems', 'Prioritization'];
+    const tabs = ['Dashboard', 'Problems', 'Prioritization', 'Blast Radius'];
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
@@ -147,8 +147,8 @@ const Layout = ({ children, activeTab, onTabChange, user, onLogout }) => {
             </nav>
 
             {/* Main Content Area */}
-            <main className="flex-1 overflow-visible md:overflow-hidden flex flex-col w-full px-4 sm:px-6 lg:px-8 py-6">
-                <div className="flex-1 min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <main className="flex-1 overflow-y-auto flex flex-col w-full px-4 sm:px-6 lg:px-8 py-6 scrollbar-thin scrollbar-thumb-border-muted scrollbar-track-transparent">
+                <div className="flex-1 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
                     {children}
                 </div>
             </main>
