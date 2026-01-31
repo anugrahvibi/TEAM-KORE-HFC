@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { toast } from 'sonner';
-import { Activity, Server, Zap, CheckCircle, AlertTriangle, Clock, ArrowUp, ArrowDown, Cpu, Layers } from 'lucide-react';
+import { Activity, Server, Zap, CheckCircle, AlertTriangle, Clock, ArrowUp, ArrowDown, Cpu, Layers, DollarSign } from 'lucide-react';
 import Card from './Card';
 import CorrelationAnalysis from './CorrelationAnalysis';
 
@@ -171,12 +171,12 @@ const Dashboard = () => {
                     bg={metrics.successRate < 99 ? "bg-red-500/10" : "bg-emerald-500/10"}
                 />
                 <MetricCard
-                    label="CPU Usage"
-                    value={`${metrics.cpuUsage}%`}
-                    icon={Cpu}
-                    trend={isDisasterMode ? "High Load" : "Normal Load"}
-                    color={metrics.cpuUsage > 80 ? "text-red-500" : "text-purple-500"}
-                    bg={metrics.cpuUsage > 80 ? "bg-red-500/10" : "bg-purple-500/10"}
+                    label="Cloud Cost Efficiency"
+                    value={isDisasterMode ? "$12,450" : "$8,230"}
+                    icon={DollarSign}
+                    trend={isDisasterMode ? "+$4.2k Waste Detected" : "Within Budget"}
+                    color={isDisasterMode ? "text-amber-500" : "text-emerald-500"}
+                    bg={isDisasterMode ? "bg-amber-500/10" : "bg-emerald-500/10"}
                 />
             </div>
 

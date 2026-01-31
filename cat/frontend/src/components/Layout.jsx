@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Layout = ({ children, activeTab, onTabChange, user, onLogout }) => {
-    const tabs = ['Dashboard', 'Problems', 'Prioritization'];
+    const tabs = ['Dashboard', 'Problems', 'Prioritization', 'Blast Radius'];
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (

@@ -92,6 +92,9 @@ function MainApp() {
             case 'Prioritization':
                 return <Prioritization />;
 
+            case 'Blast Radius':
+                return <BlastRadius />;
+
             default:
                 return null;
         }

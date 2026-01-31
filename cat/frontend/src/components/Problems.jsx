@@ -3,9 +3,12 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { Filter, RefreshCcw, Activity, AlertOctagon, Monitor, Clock, ChevronDown, Download, EyeOff, LayoutGrid, List } from 'lucide-react';
 
 import ProblemDetail from './ProblemDetail';
+import { AnimatePresence } from 'framer-motion';
+import BlastRadiusColumn from './BlastRadiusModal';
 
 const Problems = () => {
     const [selectedProblem, setSelectedProblem] = useState(null);
+    const [selectedBlastRadiusProblem, setSelectedBlastRadiusProblem] = useState(null);
     const [activeFilter, setActiveFilter] = useState('All');
     const [selectedCategory, setSelectedCategory] = useState([]);
 
@@ -284,7 +287,9 @@ const Problems = () => {
                                     <th className="px-4 py-3 w-40 bg-[#14151a]">Category</th>
                                     <th className="px-4 py-3 w-32 text-center bg-[#14151a]">Affected</th>
                                     <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Started</th>
+                                    <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Started</th>
                                     <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Duration</th>
+                                    <th className="px-4 py-3 w-24 bg-[#14151a]">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-muted">
@@ -318,6 +323,21 @@ const Problems = () => {
                                         <td className="px-4 py-3 text-center text-text-muted group-hover:text-text-main text-sm">{problem.affected}</td>
                                         <td className="px-4 py-3 text-right text-text-muted whitespace-nowrap text-sm">{problem.started}</td>
                                         <td className="px-4 py-3 text-right text-text-muted font-mono text-sm">{problem.duration}</td>
+                                        <td className="px-4 py-3 text-center">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedBlastRadiusProblem(problem);
+                                                }}
+                                                className="p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-primary/20 hover:border-primary/50 text-text-muted hover:text-white transition-all group relative"
+                                                title="Analyze Blast Radius"
+                                            >
+                                                <Activity size={14} className="group-hover:text-primary" />
+                                                {problem.status === 'Active' && problem.category === 'Availability' && (
+                                                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                                )}
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -369,6 +389,22 @@ const Problems = () => {
                     </div>
                 </div>
             </div>
+            {/* Blast Radius Modal for Problems */}
+            <AnimatePresence>
+                {selectedBlastRadiusProblem && (
+                    <BlastRadiusColumn
+                        isOpen={!!selectedBlastRadiusProblem}
+                        onClose={() => setSelectedBlastRadiusProblem(null)}
+                        scenarioData={{
+                            service: selectedBlastRadiusProblem.affected,
+                            description: selectedBlastRadiusProblem.name,
+                            version: 'Detected Risk',
+                            type: selectedBlastRadiusProblem.category,
+                            riskLevel: selectedBlastRadiusProblem.status === 'Active' ? 'Critical' : 'Low'
+                        }}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 };

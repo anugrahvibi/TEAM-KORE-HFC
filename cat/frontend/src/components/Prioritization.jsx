@@ -19,7 +19,8 @@ import {
     Activity,
     CheckCircle2
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import BlastRadiusColumn from './BlastRadiusModal';
 
 const Prioritization = () => {
     // Enhanced Mock Data with more realistic attributes
@@ -111,6 +112,7 @@ const Prioritization = () => {
     ];
 
     const [sortConfig, setSortConfig] = useState({ key: 'riskScore', direction: 'desc' });
+    const [selectedVuln, setSelectedVuln] = useState(null);
 
     // Sorting Logic
     const sortedData = useMemo(() => {
@@ -260,6 +262,7 @@ const Prioritization = () => {
                                 <th className="px-6 py-4 w-40">Affected Asset</th>
                                 <th className="px-6 py-4 w-32 text-center">Teams</th>
                                 <th className="px-6 py-4 w-32 text-right">Age</th>
+                                <th className="px-6 py-4 w-24">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-muted">
@@ -326,12 +329,45 @@ const Prioritization = () => {
                                             )}
                                         </div>
                                     </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedVuln(vuln);
+                                            }}
+                                            className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-primary/20 hover:border-primary/50 text-text-muted hover:text-white transition-all group relative"
+                                            title="Analyze Blast Radius"
+                                        >
+                                            <Activity size={16} className="group-hover:text-primary" />
+                                            {vuln.riskScore > 80 && (
+                                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                            )}
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
             </motion.div>
+
+            {/* Blast Radius Modal - Opens when table action is clicked */}
+            <AnimatePresence>
+                {selectedVuln && (
+                    <BlastRadiusColumn
+                        isOpen={!!selectedVuln}
+                        onClose={() => setSelectedVuln(null)}
+                        scenarioData={{
+                            service: selectedVuln.affectedStr,
+                            description: selectedVuln.name,
+                            version: 'Current',
+                            type: selectedVuln.type,
+                            // We pass mock data here because the backend isn't real yet, 
+                            // but in a real app this would fetch the graph for this specific ID.
+                        }}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 };
