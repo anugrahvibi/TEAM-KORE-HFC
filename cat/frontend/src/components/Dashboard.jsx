@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { toast } from 'sonner';
 import { Activity, Server, Zap, CheckCircle, AlertTriangle, Clock, ArrowUp, ArrowDown, Cpu, Layers } from 'lucide-react';
 import Card from './Card';
+import CorrelationAnalysis from './CorrelationAnalysis';
 
 const Dashboard = () => {
     // Top-level mock metrics
@@ -141,7 +142,7 @@ const Dashboard = () => {
     ];
 
     return (
-        <div className="flex flex-col gap-6 h-full text-text-main">
+        <div className="flex flex-col gap-6 min-h-full text-text-main">
 
             {/* Top Metrics Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
@@ -311,6 +312,11 @@ const Dashboard = () => {
                         </div>
                     </div>
                 ))}
+            </div>
+
+            {/* Correlation Analysis Section - Added for User Request */}
+            <div className="mt-8">
+                <CorrelationAnalysis />
             </div>
         </div>
     );
