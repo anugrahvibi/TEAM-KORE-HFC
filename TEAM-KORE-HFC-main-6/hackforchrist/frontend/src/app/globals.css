@@ -73,7 +73,21 @@
 }
 
 @layer utilities {
-  .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl {
+
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg,
+  .shadow-xl,
+  .shadow-2xl {
     box-shadow: none !important;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

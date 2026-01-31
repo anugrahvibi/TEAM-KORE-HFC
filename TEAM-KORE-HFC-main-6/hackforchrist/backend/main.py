@@ -16,7 +16,7 @@ from typing import List, Optional, Dict
 import hashlib
 import secrets
 
-app = FastAPI(title="DevInsight Backend")
+app = FastAPI(title="Sentinal Backend")
 
 # Load ML Models
 ML_DATA_DIR = os.path.join(os.path.dirname(__file__), "../data")

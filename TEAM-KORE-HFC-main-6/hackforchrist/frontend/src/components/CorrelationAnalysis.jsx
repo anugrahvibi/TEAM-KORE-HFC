@@ -16,11 +16,14 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-import { getCorrelationData } from '../utils/dataProvider';
+import { getCorrelationData, getBlastRadiusData } from '../utils/dataProvider';
+import BlastRadiusColumn from './BlastRadiusModal';
 
 const CorrelationAnalysis = ({ data = null, onClose }) => {
     // Load from data provider if not passed
     const analysisData = data || getCorrelationData();
+    const [isBlastRadiusOpen, setIsBlastRadiusOpen] = useState(false);
+    const blastData = getBlastRadiusData();
 
     const { service, change_event, correlation } = analysisData;
 
@@ -156,7 +159,7 @@ const CorrelationAnalysis = ({ data = null, onClose }) => {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.1 }}
-                            className="bg-app-bg border border-border-muted rounded-xl p-5 hover:border-primary/30 transition-colors"
+                            className="bg-app-bg border border-border-muted rounded-xl p-5 hover:border-primary/30 transition-colors cursor-pointer"
                         >
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-3">
@@ -213,15 +216,33 @@ const CorrelationAnalysis = ({ data = null, onClose }) => {
                     ))}
 
                     <div className="flex justify-end gap-3 mt-4">
-                        <button className="px-4 py-2 rounded-lg text-sm font-medium text-text-muted hover:text-text-main hover:bg-white/5 border border-transparent hover:border-white/10 transition-all flex items-center gap-2">
-                            <Share2 size={16} /> Share Report
+                        <button
+                            onClick={() => setIsBlastRadiusOpen(true)}
+                            className="px-4 py-1.5 rounded-lg text-sm font-semibold border border-blue-500/20 text-blue-400 hover:bg-blue-500/10 transition-all flex items-center gap-2"
+                        >
+                            <Activity size={14} /> Predict Impact
                         </button>
-                        <button className="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center gap-2">
-                            <CheckCircle2 size={16} /> Mark Resolved
+                        <button className="px-4 py-1.5 rounded-lg text-sm font-semibold bg-primary/90 hover:bg-primary text-white shadow-sm transition-all flex items-center gap-2">
+                            <CheckCircle2 size={14} /> Resolve
                         </button>
                     </div>
                 </div>
             </div>
+
+            {/* Blast Radius Integration */}
+            <BlastRadiusColumn
+                isOpen={isBlastRadiusOpen}
+                onClose={() => setIsBlastRadiusOpen(false)}
+                scenarioData={{
+                    service: service,
+                    description: `Predictive impact for ${change_event.type} ${change_event.version}`,
+                    version: change_event.version,
+                    type: change_event.type,
+                    riskLevel: correlation.correlation_confidence > 0.8 ? 'Critical' : 'High',
+                    graph: blastData.graph,
+                    insights: blastData.insights
+                }}
+            />
         </motion.div>
     );
 };

@@ -4,9 +4,13 @@ import {
     Globe, Activity, AlertOctagon, Terminal, FileText, Settings,
     Cpu, Network, GitBranch, Layers, ArrowLeft
 } from 'lucide-react';
+import BlastRadiusColumn from './BlastRadiusModal';
+import { getBlastRadiusData } from '../utils/dataProvider';
 
 const ProblemDetail = ({ problem, onBack }) => {
     const [activeTab, setActiveTab] = useState('Overview');
+    const [isBlastRadiusOpen, setIsBlastRadiusOpen] = useState(false);
+    const blastData = getBlastRadiusData();
 
     // Theme vars mapped to Tailwind classes for consistency
     const currentTheme = {
@@ -17,7 +21,7 @@ const ProblemDetail = ({ problem, onBack }) => {
         border: 'border-border-muted',
     };
 
-    const tabs = ['Overview', 'Deployment', 'Events', 'Logs', 'Troubleshooting'];
+    const tabs = ['Overview', 'Deployment', 'Events', 'Blast Radius', 'Logs', 'Troubleshooting'];
 
     return (
         <div className="h-full flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300 text-text-main">
@@ -174,7 +178,12 @@ const ProblemDetail = ({ problem, onBack }) => {
                             <Layers size={16} className="text-blue-400" />
                             Visual resolution path
                         </div>
-                        <MoreVertical size={16} className="text-text-muted cursor-pointer" />
+                        <button
+                            onClick={() => setIsBlastRadiusOpen(true)}
+                            className="text-[10px] font-bold px-2 py-1 rounded bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 transition-all flex items-center gap-1"
+                        >
+                            <Activity size={10} /> ANALYZE BLAST RADIUS
+                        </button>
                     </div>
 
                     <div className="flex-1 p-4 overflow-hidden flex flex-col">
@@ -233,6 +242,23 @@ const ProblemDetail = ({ problem, onBack }) => {
                     </div>
                 </div>
             </div>
+            {/* Blast Radius Integration */}
+            <BlastRadiusColumn
+                isOpen={isBlastRadiusOpen || activeTab === 'Blast Radius'}
+                onClose={() => {
+                    setIsBlastRadiusOpen(false);
+                    if (activeTab === 'Blast Radius') setActiveTab('Overview');
+                }}
+                scenarioData={{
+                    service: problem?.affected || 'payment-service',
+                    description: problem?.name || 'Critical Latency Spike',
+                    version: 'Detected Issue',
+                    type: problem?.category || 'Availability',
+                    riskLevel: 'Critical',
+                    graph: blastData.graph,
+                    insights: blastData.insights
+                }}
+            />
         </div>
     );
 };

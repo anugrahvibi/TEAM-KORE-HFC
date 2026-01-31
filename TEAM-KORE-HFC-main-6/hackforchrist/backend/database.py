@@ -6,7 +6,7 @@ from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
-DB_NAME = "devinsight"
+DB_NAME = "sentinal"
 
 class MockCursor:
     def __init__(self, data):

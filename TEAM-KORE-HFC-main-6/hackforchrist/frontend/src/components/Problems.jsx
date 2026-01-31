@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Filter, RefreshCcw, Activity, AlertOctagon, Monitor, Clock, ChevronDown, Download, EyeOff, LayoutGrid, List } from 'lucide-react';
 
-import ProblemDetail from './ProblemDetail';
-import { AnimatePresence } from 'framer-motion';
+
+import { AnimatePresence, motion } from 'framer-motion';
 import BlastRadiusColumn from './BlastRadiusModal';
 import { getAlerts, getBlastRadiusData } from '../utils/dataProvider';
 
 const Problems = () => {
-    const [selectedProblem, setSelectedProblem] = useState(null);
     const [selectedBlastRadiusProblem, setSelectedBlastRadiusProblem] = useState(null);
     const [activeFilter, setActiveFilter] = useState('All');
     const [selectedCategory, setSelectedCategory] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const blastData = getBlastRadiusData();
 
     // Theme logic moved to global text utilities
@@ -50,10 +50,10 @@ const Problems = () => {
     const allProblems = alerts.map(a => ({
         id: a.id,
         name: a.name,
-        status: 'Active',
-        category: 'Availability',
+        status: a.status || 'Active',
+        category: a.type || 'Availability',
         affected: a.affectedStr,
-        started: 'Just now', // Simplified
+        started: a.age || 'Just now',
         duration: '1m'
     }));
 
@@ -61,7 +61,10 @@ const Problems = () => {
         .filter(problem => {
             const matchesStatus = activeFilter === 'All' || problem.status === activeFilter;
             const matchesCategory = selectedCategory.length === 0 || selectedCategory.includes(problem.category);
-            return matchesStatus && matchesCategory;
+            const matchesSearch = problem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                problem.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                problem.affected.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesStatus && matchesCategory && matchesSearch;
         })
         .sort((a, b) => {
             if (a.status === 'Active' && b.status !== 'Active') return -1;
@@ -69,7 +72,8 @@ const Problems = () => {
             return 0;
         });
 
-    const categories = ['Resource contention', 'Custom', 'Availability', 'Custom alert'];
+    const categories = Array.from(new Set(allProblems.map(p => p.category)));
+    const statuses = ['All', ...Array.from(new Set(allProblems.map(p => p.status)))];
 
     const handleCategoryChange = (category) => {
         if (selectedCategory.includes(category)) {
@@ -79,31 +83,42 @@ const Problems = () => {
         }
     };
 
-    // If a problem is selected, render the detail view
-    if (selectedProblem) {
-        return <ProblemDetail problem={selectedProblem} onBack={() => setSelectedProblem(null)} />;
-    }
+
 
     return (
         <div className="flex flex-col lg:flex-row gap-6 h-full text-text-main">
             {/* Sidebar / Filters */}
             <div className="w-full lg:w-64 flex-shrink-0 space-y-8">
                 {/* Status Filter */}
-                <div>
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
                     {/* Default Filter Button */}
                     <div className="mb-6">
-                        <button className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-card-bg border border-border-muted shadow-sm text-sm font-medium hover:border-text-muted transition-colors">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full flex items-center justify-between px-3 py-2 rounded-md bg-card-bg border border-border-muted shadow-sm text-sm font-medium hover:border-text-muted transition-colors"
+                        >
                             <span className="flex items-center gap-2 text-blue-400">
                                 Default filter
                             </span>
                             <ChevronDown size={14} className="text-text-muted" />
-                        </button>
+                        </motion.button>
                     </div>
 
                     <h3 className="text-sm font-semibold mb-3 text-text-muted">Status</h3>
                     <div className="space-y-2">
-                        {['All', 'Active', 'Closed'].map((status) => (
-                            <label key={status} className="flex items-center gap-2 cursor-pointer group">
+                        {statuses.map((status, i) => (
+                            <motion.label
+                                key={status}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                                className="flex items-center gap-2 cursor-pointer group"
+                            >
                                 <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${activeFilter === status ? 'border-primary' : 'border-border-muted group-hover:border-primary'}`}>
                                     {activeFilter === status && <div className="w-2 h-2 rounded-full bg-primary" />}
                                 </div>
@@ -115,17 +130,27 @@ const Problems = () => {
                                     checked={activeFilter === status}
                                     onChange={() => setActiveFilter(status)}
                                 />
-                            </label>
+                            </motion.label>
                         ))}
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Category Filter */}
-                <div>
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
                     <h3 className="text-sm font-semibold mb-3 text-text-muted">Category</h3>
                     <div className="space-y-2">
-                        {categories.map((category) => (
-                            <label key={category} className="flex items-center gap-2 cursor-pointer group">
+                        {categories.map((category, i) => (
+                            <motion.label
+                                key={category}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 + (i * 0.05) }}
+                                className="flex items-center gap-2 cursor-pointer group"
+                            >
                                 <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedCategory.includes(category) ? 'bg-primary border-primary' : 'border-border-muted group-hover:border-primary'}`}>
                                     {selectedCategory.includes(category) && <div className="w-2 h-2 bg-text-main" />}
                                 </div>
@@ -136,50 +161,69 @@ const Problems = () => {
                                     checked={selectedCategory.includes(category)}
                                     onChange={() => handleCategoryChange(category)}
                                 />
-                            </label>
+                            </motion.label>
                         ))}
                     </div>
-                </div>
+                </motion.div>
             </div>
 
             {/* Main Content */}
             <div className="flex-1 min-w-0 flex flex-col space-y-4 min-h-0">
                 {/* Top Header Panel */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card-bg border border-border-muted shadow-sm">
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card-bg border border-border-muted shadow-sm"
+                >
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-white/5 rounded-md text-text-muted">
                             <LayoutGrid size={20} />
                         </div>
                         <div className="flex items-baseline gap-2">
                             <h2 className="text-lg font-bold text-text-main">Problems</h2>
-                            <span className="px-2 py-0.5 text-xs font-semibold bg-[#dc172a]/10 text-[#dc172a] rounded-full border border-[#dc172a]/20">
+                            <motion.span
+                                initial={{ scale: 0.9 }}
+                                animate={{ scale: 1 }}
+                                className="px-2 py-0.5 text-xs font-semibold bg-[#dc172a]/10 text-[#dc172a] rounded-full border border-[#dc172a]/20"
+                            >
                                 <Activity size={10} className="inline mr-1" />
                                 {allProblems.filter(p => p.status === 'Active').length} active
-                            </span>
+                            </motion.span>
                             <span className="text-sm text-text-muted">/ {allProblems.length}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-border-muted hover:bg-white/5 text-text-muted hover:text-text-main transition-colors">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-border-muted hover:bg-white/5 text-text-muted hover:text-text-main transition-colors"
+                        >
                             Last 2 hours
                             <ChevronDown size={14} />
-                        </button>
+                        </motion.button>
                         <div className="flex items-center gap-1 text-xs text-text-muted">
                             <RefreshCcw size={12} />
                             <span>refreshed 1 min. ago</span>
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Chart Section */}
-                <div className="p-4 rounded-xl bg-card-bg border border-border-muted shadow-sm flex-shrink-0">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="p-4 rounded-xl bg-card-bg border border-border-muted shadow-sm flex-shrink-0"
+                >
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2 relative w-full max-w-md">
                             <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                             <input
                                 type="text"
                                 placeholder="Type to filter..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-9 pr-4 py-1.5 text-sm rounded-md border border-border-muted bg-app-bg text-text-main placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
                             />
                         </div>
@@ -254,7 +298,7 @@ const Problems = () => {
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Table Section */}
                 <div className="flex flex-col flex-1 min-h-[400px] lg:min-h-0 bg-card-bg border border-border-muted shadow-sm rounded-xl overflow-hidden relative">
@@ -270,116 +314,143 @@ const Problems = () => {
                     {/* Scrollable Table Container - Absolute positioning to force fit */}
                     <div className="absolute inset-0 top-[37px] overflow-auto" style={{ scrollbarGutter: 'stable' }}>
                         {/* Desktop Table View (Large Screens) */}
-                        <table className="hidden lg:table w-full text-sm text-left relative table-fixed">
-                            <thead className="bg-[#14151a] border-b border-border-muted text-xs uppercase text-text-muted font-semibold sticky top-0 z-10">
+                        <table className="hidden lg:table w-full text-sm text-left relative">
+                            <thead className="bg-[#14151a] border-b border-border-muted text-sm uppercase text-text-muted font-semibold sticky top-0 z-10">
                                 <tr>
-                                    <th className="px-4 py-3 w-12 bg-[#14151a]">
+                                    <th className="px-4 py-4 w-12 bg-[#14151a]">
                                         <input type="checkbox" className="rounded bg-app-bg border-border-muted checked:bg-primary checked:border-primary" />
                                     </th>
-                                    <th className="px-4 py-3 w-28 bg-[#14151a]">ID</th>
-                                    <th className="px-4 py-3 w-auto bg-[#14151a]">Name</th>
-                                    <th className="px-4 py-3 w-32 bg-[#14151a]">Status</th>
-                                    <th className="px-4 py-3 w-40 bg-[#14151a]">Category</th>
-                                    <th className="px-4 py-3 w-32 text-center bg-[#14151a]">Affected</th>
-                                    <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Started</th>
-                                    <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Started</th>
-                                    <th className="px-4 py-3 w-32 text-right bg-[#14151a]">Duration</th>
-                                    <th className="px-4 py-3 w-24 bg-[#14151a]">Action</th>
+                                    <th className="px-4 py-4 w-24 bg-[#14151a] hidden xl:table-cell">ID</th>
+                                    <th className="px-4 py-4 w-auto bg-[#14151a]">Name</th>
+                                    <th className="px-4 py-4 w-32 bg-[#14151a]">Status</th>
+                                    <th className="px-4 py-4 w-40 bg-[#14151a] hidden xl:table-cell">Category</th>
+                                    <th className="px-4 py-4 w-32 text-center bg-[#14151a]">Affected</th>
+                                    <th className="px-4 py-4 w-28 text-right bg-[#14151a]">Started</th>
+                                    <th className="px-4 py-4 w-24 text-right bg-[#14151a] hidden 2xl:table-cell">Duration</th>
+                                    <th className="px-4 py-4 w-20 bg-[#14151a] text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-muted">
-                                {filteredProblems.map((problem) => (
-                                    <tr key={problem.id} onClick={() => setSelectedProblem(problem)} className="hover:bg-white/5 transition-colors group cursor-pointer">
-                                        <td className="px-4 py-3">
-                                            <input type="checkbox" className="rounded bg-app-bg border-border-muted" />
-                                        </td>
-                                        <td className="px-4 py-3 font-mono text-sm text-text-muted">{problem.id}</td>
-                                        <td className="px-4 py-3 font-medium text-text-main max-w-xs truncate text-base" title={problem.name}>
-                                            {problem.name}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-sm font-medium border ${problem.status === 'Active'
-                                                ? 'bg-[#dc172a]/10 text-[#dc172a] border-[#dc172a]/20'
-                                                : 'bg-white/5 text-text-muted border-border-muted'
-                                                }`}>
-                                                {problem.status === 'Active' ? <AlertOctagon size={12} /> : <Clock size={12} />}
-                                                {problem.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-text-muted group-hover:text-text-main transition-colors text-sm">
-                                            <div className="flex items-center gap-2">
-                                                {problem.category === 'Resource contention' && <Monitor size={14} />}
-                                                {problem.category === 'Custom' && <LayoutGrid size={14} />}
-                                                {problem.category === 'Availability' && <Activity size={14} />}
-                                                {problem.category === 'Custom alert' && <AlertOctagon size={14} />}
-                                                <span className="truncate max-w-[140px]">{problem.category}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3 text-center text-text-muted group-hover:text-text-main text-sm">{problem.affected}</td>
-                                        <td className="px-4 py-3 text-right text-text-muted whitespace-nowrap text-sm">{problem.started}</td>
-                                        <td className="px-4 py-3 text-right text-text-muted font-mono text-sm">{problem.duration}</td>
-                                        <td className="px-4 py-3 text-center">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedBlastRadiusProblem(problem);
-                                                }}
-                                                className="p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-primary/20 hover:border-primary/50 text-text-muted hover:text-white transition-all group relative"
-                                                title="Analyze Blast Radius"
-                                            >
-                                                <Activity size={14} className="group-hover:text-primary" />
-                                                {problem.status === 'Active' && problem.category === 'Availability' && (
-                                                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                                                )}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                <AnimatePresence mode='popLayout'>
+                                    {filteredProblems.map((problem, index) => (
+                                        <motion.tr
+                                            key={problem.id}
+                                            layout
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{ delay: index * 0.05 }}
+                                            onClick={() => setSelectedBlastRadiusProblem(problem)}
+                                            className="hover:bg-white/5 transition-colors group cursor-pointer"
+                                        >
+                                            <td className="px-4 py-3">
+                                                <input type="checkbox" className="rounded bg-app-bg border-border-muted" />
+                                            </td>
+                                            <td className="px-4 py-4 font-mono text-sm text-text-muted hidden xl:table-cell">{problem.id}</td>
+                                            <td className="px-4 py-4 font-medium text-text-main max-w-xs truncate text-base" title={problem.name}>
+                                                {problem.name}
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded text-sm font-medium border ${problem.status === 'Active'
+                                                    ? 'bg-[#dc172a]/10 text-[#dc172a] border-[#dc172a]/20'
+                                                    : 'bg-white/5 text-text-muted border-border-muted'
+                                                    }`}>
+                                                    {problem.status === 'Active' ? <AlertOctagon size={14} /> : <Clock size={14} />}
+                                                    {problem.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-4 text-text-muted group-hover:text-text-main transition-colors text-sm hidden xl:table-cell">
+                                                <div className="flex items-center gap-2">
+                                                    {(problem.category.includes('Resource') || problem.category.includes('Performance')) && <Monitor size={16} />}
+                                                    {(problem.category.includes('Security') || problem.category.includes('SQL')) && <AlertOctagon size={16} />}
+                                                    {problem.category === 'Anomaly' && <Activity size={16} />}
+                                                    {problem.category === 'Misconfig' && <LayoutGrid size={16} />}
+                                                    <span className="truncate max-w-[120px]">{problem.category}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4 text-center text-text-muted group-hover:text-text-main text-sm">{problem.affected}</td>
+                                            <td className="px-4 py-4 text-right text-text-muted whitespace-nowrap text-sm">{problem.started}</td>
+                                            <td className="px-4 py-4 text-right text-text-muted font-mono text-sm hidden 2xl:table-cell">{problem.duration}</td>
+                                            <td className="px-4 py-3 text-center">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedBlastRadiusProblem(problem);
+                                                    }}
+                                                    className="p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-primary/20 hover:border-primary/50 text-text-muted hover:text-white transition-all group relative"
+                                                    title="Analyze Blast Radius"
+                                                >
+                                                    <Activity size={14} className="group-hover:text-primary" />
+                                                    {problem.status === 'Active' && problem.category === 'Availability' && (
+                                                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                                    )}
+                                                </button>
+                                            </td>
+                                        </motion.tr>
+                                    ))}
+                                </AnimatePresence>
                             </tbody>
                         </table>
 
                         {/* Mobile/Tablet Card View (Small Screens) */}
                         <div className="lg:hidden flex flex-col gap-3 p-4">
-                            {filteredProblems.map((problem) => (
-                                <div
-                                    key={problem.id}
-                                    onClick={() => setSelectedProblem(problem)}
-                                    className="bg-card-bg border border-border-muted rounded-xl p-4 space-y-3 hover:bg-white/5 hover:-translate-y-1 hover:shadow-lg active:scale-[0.99] transition-all cursor-pointer shadow-sm"
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${problem.status === 'Active'
-                                                ? 'bg-[#dc172a]/10 text-[#dc172a] border-[#dc172a]/20'
-                                                : 'bg-white/5 text-text-muted border-border-muted'
-                                                }`}>
-                                                {problem.status === 'Active' ? <AlertOctagon size={10} /> : <Clock size={10} />}
-                                                {problem.status}
-                                            </span>
-                                            <span className="font-mono text-xs text-text-muted">{problem.id}</span>
-                                        </div>
-                                        <span className="text-xs text-text-muted whitespace-nowrap">{problem.started}</span>
-                                    </div>
-
-                                    <h3 className="font-medium text-text-main text-base leading-tight">
-                                        {problem.name}
-                                    </h3>
-
-                                    <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-text-muted pt-2 border-t border-border-muted/50">
-                                        <div className="col-span-2 sm:col-span-1 flex items-center gap-2 text-text-main">
-                                            {problem.category === 'Resource contention' && <Monitor size={14} className="text-text-muted" />}
-                                            {problem.category === 'Custom' && <LayoutGrid size={14} className="text-text-muted" />}
-                                            {problem.category === 'Availability' && <Activity size={14} className="text-text-muted" />}
-                                            {problem.category === 'Custom alert' && <AlertOctagon size={14} className="text-text-muted" />}
-                                            <span className="truncate">{problem.category}</span>
+                            <AnimatePresence mode='popLayout'>
+                                {filteredProblems.map((problem, index) => (
+                                    <motion.div
+                                        key={problem.id}
+                                        layout
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.9 }}
+                                        transition={{ delay: index * 0.05 }}
+                                        onClick={() => setSelectedBlastRadiusProblem(problem)}
+                                        className="bg-card-bg border border-border-muted rounded-xl p-4 space-y-3 hover:bg-white/5 hover:-translate-y-1 hover:shadow-lg transition-all cursor-pointer shadow-sm"
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded text-sm font-medium border ${problem.status === 'Active'
+                                                    ? 'bg-[#dc172a]/10 text-[#dc172a] border-[#dc172a]/20'
+                                                    : 'bg-white/5 text-text-muted border-border-muted'
+                                                    }`}>
+                                                    {problem.status === 'Active' ? <AlertOctagon size={12} /> : <Clock size={12} />}
+                                                    {problem.status}
+                                                </span>
+                                                <span className="font-mono text-sm text-text-muted">{problem.id}</span>
+                                            </div>
+                                            <span className="text-sm text-text-muted whitespace-nowrap">{problem.started}</span>
                                         </div>
 
-                                        <div className="col-span-2 sm:col-span-1 flex items-center justify-between sm:justify-end gap-4">
-                                            <span className="text-xs">Affected: <span className="text-text-main">{problem.affected}</span></span>
-                                            <span className="text-xs font-mono bg-white/5 px-1.5 py-0.5 rounded">{problem.duration}</span>
+                                        <h3 className="font-medium text-text-main text-base leading-tight">
+                                            {problem.name}
+                                        </h3>
+
+                                        <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm text-text-muted pt-3 border-t border-border-muted/50">
+                                            <div className="col-span-2 sm:col-span-1 flex items-center gap-2 text-text-main">
+                                                {(problem.category.includes('Resource') || problem.category.includes('Performance')) && <Monitor size={16} className="text-text-muted" />}
+                                                {(problem.category.includes('Security') || problem.category.includes('SQL')) && <AlertOctagon size={16} className="text-text-muted" />}
+                                                {problem.category === 'Anomaly' && <Activity size={16} className="text-text-muted" />}
+                                                {problem.category === 'Misconfig' && <LayoutGrid size={16} className="text-text-muted" />}
+                                                <span className="truncate">{problem.category}</span>
+                                            </div>
+                                            <div className="col-span-2 sm:col-span-1 flex items-center justify-between sm:justify-end gap-4 mt-2 sm:mt-0">
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-sm">Affected: <span className="text-text-main">{problem.affected}</span></span>
+                                                    <span className="text-sm font-mono bg-white/5 px-2 py-0.5 rounded">{problem.duration}</span>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedBlastRadiusProblem(problem);
+                                                    }}
+                                                    className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all flex items-center gap-2 text-xs font-bold"
+                                                >
+                                                    <Activity size={14} /> BLAST
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            ))}
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </div>

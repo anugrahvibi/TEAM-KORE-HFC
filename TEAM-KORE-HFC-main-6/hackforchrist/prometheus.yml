@@ -3,6 +3,6 @@ global:
   evaluation_interval: 2s
 
 scrape_configs:
-  - job_name: 'devinsight_mock_services'
+  - job_name: 'sentinal_mock_services'
     static_configs:
       - targets: ['localhost:8001']

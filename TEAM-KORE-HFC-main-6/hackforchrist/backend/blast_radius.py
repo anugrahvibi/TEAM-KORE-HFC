@@ -64,12 +64,22 @@ def analyze_blast_radius(service_name, current_metrics):
 
     trace(service_name)
 
-    # 3. Summary
+    # 3. Summary (Analytical Formula Application)
+    total_at_risk = len(set(p["service"] for p in predicted_propagation))
+    max_depth = max([p["expected_impact_minutes"]/5 for p in predicted_propagation]) if predicted_propagation else 0
+    
+    # Financial Impact Formula: Services * Avg Hourly Cost * System Confidence
+    financial_exposure = total_at_risk * 415.75 * confidence if state != "Healthy" else 0
+    
+    # User Impact Formula: Services * Base User Traffic * propagation confidence
+    users_impacted = total_at_risk * 1350 * confidence if state != "Healthy" else 0
+
     summary = {
-        "total_services_at_risk": len(set(p["service"] for p in predicted_propagation)),
-        "max_propagation_depth": max([p["expected_impact_minutes"]/5 for p in predicted_propagation]) if predicted_propagation else 0,
-        "estimated_users_affected": 8200 if state != "Healthy" else 0,
-        "sla_violation_risk": "Likely" if state == "Critical" else ("Possible" if state == "Degrading" else "Low")
+        "total_services_at_risk": total_at_risk,
+        "max_propagation_depth": max_depth,
+        "estimated_users_affected": int(users_impacted),
+        "sla_violation_risk": "Likely" if state == "Critical" else ("Possible" if state == "Degrading" else "Low"),
+        "cost_impact": round(financial_exposure, 2)
     }
 
     return {

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# DevInsight Local Launcher
+# Sentinal Local Launcher
 # Use this if Docker Compose is not available
 
 # Colors
@@ -9,7 +9,7 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${BLUE}=== DevInsight Local Launcher ===${NC}"
+echo -e "${BLUE}=== Sentinal Local Launcher ===${NC}"
 
 # Check for MongoDB
 echo -e "${BLUE}Checking MongoDB connection...${NC}"

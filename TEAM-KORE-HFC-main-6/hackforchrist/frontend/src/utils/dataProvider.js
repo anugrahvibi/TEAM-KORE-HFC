@@ -3,27 +3,39 @@ import blastRadiusResults from '../data/blast_radius_results.json';
 import initialResults from '../data/initial_results.json';
 
 // Normalize Dashboard Metrics from initial_results or ml_results
-export const getDashboardMetrics = () => {
+export const getDashboardMetrics = (options = { randomize: false }) => {
     // initial_results has "features" which includes mean_cpu, mean_memory, etc.
     const features = initialResults.results?.[0]?.features || {};
 
+    // Simulate live data fluctuations
+    const randomFluctuation = (base, range) => {
+        if (!options.randomize) return parseFloat(base) || 0;
+        const val = parseFloat(base) || 0;
+        const change = (Math.random() - 0.5) * range;
+        return val + change;
+    };
+
+    const cpuVal = randomFluctuation(features.mean_cpu || 42, 5);
+    const memVal = randomFluctuation(features.mean_memory || 512, 50);
+    const reqVal = randomFluctuation(2500, 200);
+
     return {
         cpu: {
-            value: `${Math.round(features.mean_cpu || 0)}%`,
+            value: `${Math.round(cpuVal)}%`,
             trend: features.cpu_trend > 0 ? `+${features.cpu_trend.toFixed(1)}%` : `${features.cpu_trend.toFixed(1)}%`,
-            status: features.mean_cpu > 80 ? 'critical' : 'normal'
+            status: cpuVal > 80 ? 'critical' : 'normal'
         },
         memory: {
-            value: `${Math.round(features.mean_memory || 0)}MB`,
+            value: `${Math.round(memVal)}MB`,
             trend: features.memory_trend > 0 ? `+${features.memory_trend.toFixed(1)}` : `${features.memory_trend.toFixed(1)}`,
-            status: features.mean_memory > 1000 ? 'warning' : 'normal' // arbitrary threshold
+            status: memVal > 1000 ? 'warning' : 'normal'
         },
         requests: {
-            value: `${Math.round(features.mean_requests || 0)}/s`,
+            value: `${Math.round(reqVal)}/s`,
             trend: features.throughput_delta > 0 ? `+${features.throughput_delta}` : `${features.throughput_delta}`,
         },
         cost: {
-            value: `$${(features.unit_economics_ratio * 100).toFixed(2)}`, // Fake mock
+            value: `$${(features.unit_economics_ratio * 100 || 0).toFixed(2)}`,
             delta: features.cost_delta || 0
         },
         // Anomaly Status
@@ -64,7 +76,7 @@ export const getBlastRadiusData = () => {
             x: 400, // to the right
             y: yPos,
             status: item.risk_level === 'High' ? 'risk' : item.risk_level === 'Medium' ? 'warning' : 'safe',
-            risk: item.risk_level
+            risk: `${Math.round(item.confidence * 100)}% Prop. Risk`
         });
 
         // Path from root to this node
@@ -88,10 +100,14 @@ export const getBlastRadiusData = () => {
                 desc: `Predicted impact on ${propagation.length} downstream services.`
             },
             finops: {
-                waste: '$Unknown', // Data missing in JSON
+                waste: blastRadiusResults.blast_radius?.blast_radius_summary?.cost_impact
+                    ? `$${blastRadiusResults.blast_radius.blast_radius_summary.cost_impact.toFixed(2)}`
+                    : '$0.00',
                 cause: 'Cascading resource consumption'
             },
-            recommendation: 'Manual Review Required'
+            recommendation: (blastRadiusResults.blast_radius?.confidence > 0.8 && propagation.length > 3)
+                ? 'Critically high risk. Immediate abort recommended.'
+                : 'Monitor closely with canary traffic split.'
         }
     };
 };
@@ -251,7 +267,7 @@ export const getCorrelationData = () => {
         change_event: {
             type: mlResults.change_event?.type || 'deployment',
             version: 'v2.4.0', // extracted or mock
-            timestamp: mlResults.change_event?.timestamp || new Date().toISOString()
+            timestamp: mlResults.change_event?.timestamp || '2024-02-01T10:00:00Z'
         },
         correlation: {
             is_correlated: mlResults.correlation?.is_correlated || false,
